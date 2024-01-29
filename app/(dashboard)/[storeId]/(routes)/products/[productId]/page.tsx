@@ -25,13 +25,13 @@ const categories = await prismadb.category.findMany({
     }
   });
 
-  const sizes = await prismadb.size.findMany({
+  const collections = await prismadb.collection.findMany({
     where: {
         storeId: params.storeId
     }
   });
 
-  const collors = await prismadb.collor.findMany({
+  const publishings = await prismadb.publishing.findMany({
     where: {
         storeId: params.storeId
     }
@@ -42,8 +42,8 @@ const categories = await prismadb.category.findMany({
     <div className="flex-1 space-y-4 p-8 pt-6">
 <ProductForm 
 categories={categories}
-sizes={sizes}
-collors={collors}
+collections={collections}
+publishings={publishings}
 initialData={product}/>
     </div>
   </div>);

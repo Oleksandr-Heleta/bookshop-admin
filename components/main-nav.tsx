@@ -14,42 +14,42 @@ export function MainNav({
   const routes = [
     {
       href: `/${params.storeId}`,
-      label: "Overview",
+      label: "Статистика",
       active: pathname === `/${params.storeId}`,
     },
     {
       href: `/${params.storeId}/billboards`,
-      label: "Billboards",
+      label: "Білборди",
       active: pathname === `/${params.storeId}/billboards`,
     },
     {
       href: `/${params.storeId}/categories`,
-      label: "Categories",
+      label: "Категорії",
       active: pathname === `/${params.storeId}/categories`,
     },
     {
-      href: `/${params.storeId}/sizes`,
-      label: "Sizes",
-      active: pathname === `/${params.storeId}/sizes`,
+      href: `/${params.storeId}/collections`,
+      label: "Збірки",
+      active: pathname === `/${params.storeId}/collections`,
     },
     {
-      href: `/${params.storeId}/collors`,
-      label: "Collors",
-      active: pathname === `/${params.storeId}/collors`,
+      href: `/${params.storeId}/publishings`,
+      label: "Видавництва",
+      active: pathname === `/${params.storeId}/publishings`,
     },
     {
       href: `/${params.storeId}/products`,
-      label: "Products",
+      label: "Продукти",
       active: pathname === `/${params.storeId}/products`,
     },
     {
       href: `/${params.storeId}/orders`,
-      label: "Orders",
+      label: "Замовлення",
       active: pathname === `/${params.storeId}/orders`,
     },
     {
       href: `/${params.storeId}/settings`,
-      label: "Settings",
+      label: "Налаштування",
       active: pathname === `/${params.storeId}/settings`,
     },
   ];

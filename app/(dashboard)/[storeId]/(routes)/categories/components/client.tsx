@@ -21,17 +21,17 @@ const params = useParams();
     <>
       <div className="flex items-center justify-between">
         <Heading
-          title={`Categoties(${data.length})`}
-          description="Manage your categories here."
+          title={`Категорії(${data.length})`}
+          description="Керуй своїми категоріями."
         />
         <Button onClick={()=> router.push(`/${params.storeId}/categories/new`)}>
             <Plus className="mr-2 h-4 w-4"/>
-            Add New
+            Додати
         </Button>
       </div>
       <Separator/>
       <DataTable searchKey="name" columns={columns} data={data}/>
-      <Heading title="API" description="API for categories"/>
+      <Heading title="API" description="API для категорій"/>
       <Separator/>
       <ApiList entityName="categories" entityIdName="categoryId"/>
     </>

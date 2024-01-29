@@ -23,7 +23,7 @@ export default function RootLayout({
   
   return (
     <ClerkProvider>
-    <html lang="en">
+    <html lang="ukr">
       <body className={inter.className}>
         <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
         <ToasterProvider/>

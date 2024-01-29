@@ -21,17 +21,17 @@ const params = useParams();
     <>
       <div className="flex items-center justify-between">
         <Heading
-          title={`Billboards(${data.length})`}
-          description="Manage your billboards here."
+          title={`Білборди(${data.length})`}
+          description="Керуй своїми білбордами тут."
         />
         <Button onClick={()=> router.push(`/${params.storeId}/billboards/new`)}>
             <Plus className="mr-2 h-4 w-4"/>
-            Add New
+            Додати
         </Button>
       </div>
       <Separator/>
       <DataTable searchKey="label" columns={columns} data={data}/>
-      <Heading title="API" description="API for billboards"/>
+      <Heading title="API" description="API для білбордів"/>
       <Separator/>
       <ApiList entityName="billboards" entityIdName="billboardId"/>
     </>

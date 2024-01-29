@@ -18,24 +18,28 @@ export type OrderColumn = {
 export const columns: ColumnDef<OrderColumn>[] = [
   {
     accessorKey: "products",
-    header: "Products",              
+    header: "Продукти",              
   },
   {
     accessorKey: "phone",
-    header: "Phone",              
+    header: "Телефон",              
   },
   {
     accessorKey: "address",
-    header: "Address",              
+    header: "Адреса",              
   },
   {
     accessorKey: "totalPrice",
-    header: "Total price",              
+    header: "Загальна вартість",              
   },
 
   {
     accessorKey: "isPaid",
-    header: "Paid",
+    header: "Стан",
   },
+  {
+    id: "action",
+    cell: ({row}) => <CellAction data={row.original} />
+  }
   
 ]

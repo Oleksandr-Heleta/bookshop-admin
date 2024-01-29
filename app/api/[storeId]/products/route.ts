@@ -12,11 +12,17 @@ export async function POST(
 
     const {
       name,
+      description,
       images,
       price,
+      quantity,
       categoryId,
-      collorId,
-      sizeId,
+      publishingId,
+      collectionId,
+      isNew,
+      isSale,
+      sale,
+      isLowQuantity,
       isFeatured,
       isArchived,
     } = body;
@@ -39,11 +45,11 @@ export async function POST(
     if (!categoryId) {
       return new NextResponse("Category Id is required", { status: 400 });
     }
-    if (!sizeId) {
-      return new NextResponse("Size Id is required", { status: 400 });
+    if (!collectionId) {
+      return new NextResponse("collection Id is required", { status: 400 });
     }
-    if (!collorId) {
-      return new NextResponse("Collor Id is required", { status: 400 });
+    if (!publishingId) {
+      return new NextResponse("publishing Id is required", { status: 400 });
     }
 
     if (!params.storeId) {
@@ -64,10 +70,16 @@ export async function POST(
     const product = await prismadb.product.create({
       data: {
         name,
+        description,
         price,
+        quantity,
         categoryId,
-        collorId,
-        sizeId,
+        publishingId,
+        collectionId,
+        isNew,
+        isSale,
+        sale,
+        isLowQuantity,
         isFeatured,
         isArchived,
         storeId: params.storeId,
@@ -95,8 +107,8 @@ export async function GET(
   try {
     const {searchParams} = new URL (req.url);
     const categoryId = searchParams.get('categoryId') || undefined;
-    const sizeId = searchParams.get('sizeId') || undefined;
-    const collorId = searchParams.get('collorId') || undefined;
+    const collectionId = searchParams.get('collectionId') || undefined;
+    const publishingId = searchParams.get('publishingId') || undefined;
     const isFeatured = searchParams.get('isFeatured');
 
     if (!params.storeId) {
@@ -107,16 +119,16 @@ export async function GET(
       where: {
         storeId: params.storeId,
         categoryId,
-        collorId,
-        sizeId,
+        publishingId,
+        collectionId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
       include: {
         images: true,
         category: true,
-        collor: true, 
-        size: true,
+        publishing: true, 
+        collection: true,
       },
       orderBy: {
         createdAt: 'desc'

@@ -39,7 +39,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         `/api/${params.storeId}/products/${data.id}`
       );
       router.refresh();
-      toast.success("Product deleted.");
+      toast.success("Продукт видалено.");
     } catch (error) {
       toast.error(
         "Somthing went wrong!"

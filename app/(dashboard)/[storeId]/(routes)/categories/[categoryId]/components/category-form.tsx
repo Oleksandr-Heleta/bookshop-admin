@@ -43,10 +43,10 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboa
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Edit category" : "Create category";
-  const description = initialData ? "Edit a category" : "Add a new category";
-  const toastMessage = initialData ? "Category updated." : "Category created.";
-  const action = initialData ? "Save changes" : "Create";
+  const title = initialData ? "Редагування категорії" : "Створення категорії";
+  const description = initialData ? "Редагувати категорію" : "Додати нову категорію";
+  const toastMessage = initialData ? "Категорія оновленя." : "Категорія створена.";
+  const action = initialData ? "Зберегти зміни" : "Створити";
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(formShema),
@@ -71,7 +71,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboa
       router.push(`/${params.storeId}/categories`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("Щось пішло не так!");
     } finally {
       setLoading(false);
     }
@@ -85,10 +85,10 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboa
       );
       router.refresh();
       router.push(`/${params.storeId}/categories`);
-      toast.success("Category deleted.");
+      toast.success("Категорія видалена.");
     } catch (error) {
       toast.error(
-        "Make sure you removed all products using this category first"
+        "Впевніться що всі продукти з даної категорії видалені."
       );
     } finally {
       setLoading(false);
@@ -129,11 +129,11 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboa
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Назва</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Category name"
+                      placeholder="Назва категорії"
                       {...field}
                     />
                   </FormControl>
@@ -146,7 +146,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboa
               name="billboardId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Billboard</FormLabel>
+                  <FormLabel>Білборд</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
@@ -155,7 +155,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboa
                   >
                    <FormControl>
                     <SelectTrigger >
-                      <SelectValue defaultValue={field.value} placeholder="Select a billboard"/>
+                      <SelectValue defaultValue={field.value} placeholder="Виберіть білборд"/>
                     </SelectTrigger>
                    </FormControl>
                    <SelectContent>

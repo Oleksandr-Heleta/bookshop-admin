@@ -44,12 +44,12 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Edit billboard" : "Create billboard";
-  const description = initialData ? "Edit a billboard" : "Add a new billboard";
+  const title = initialData ? "Редагування білборду" : "Створення білборду";
+  const description = initialData ? "Редагувати білборд" : "Створити білборд";
   const toastMessage = initialData
-    ? "Billboard updated."
-    : "Billboard created.";
-  const action = initialData ? "Save changes" : "Create";
+    ? "Білборд оновлено."
+    : "Білборд створено.";
+  const action = initialData ? "Зберегти зміни" : "Створити";
 
   const form = useForm<BillboardFormValues>({
     resolver: zodResolver(formShema),
@@ -71,7 +71,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       router.push(`/${params.storeId}/billboards`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("Щось пішло не так!");
     } finally {
       setLoading(false);
     }
@@ -83,9 +83,9 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       await axios.delete(`/api/${params.storeId}/billboards/${params.billboardId}`);
       router.refresh();
       router.push(`/${params.storeId}/billboards`);
-      toast.success("Billboard deleted.");
+      toast.success("Білборд видалено.");
     } catch (error) {
-      toast.error("Make sure you removed all categories using this billboard first");
+      toast.error("Переконайтесь що всі категорії які використовують цей білборд видалено.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -124,7 +124,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
               name="imageUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Background image</FormLabel>
+                  <FormLabel>Зображення для білборду</FormLabel>
                   <FormControl>
                     <ImageUpload 
                       value={field.value? [field.value] : []}
@@ -143,11 +143,11 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
               name="label"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Label</FormLabel>
+                  <FormLabel>Назва</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Billboard label"
+                      placeholder="Напис на білборді"
                       {...field}
                     />
                   </FormControl>

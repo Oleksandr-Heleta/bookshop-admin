@@ -17,8 +17,8 @@ model Store {
   userId     String
   billboards Billboard[] @relation("StoreToBillboard")
   cetegories Category[]  @relation("StoreToCategory")
-  sizes      Size[]      @relation("StoreToSize")
-  collors    Collor[]    @relation("StoreToCollor")
+  collections      Collection[]      @relation("StoreTocollection")
+  publishings    Publishing[]    @relation("StoreTopublishing")
   products   Product[]   @relation("StoreToProduct")
   orders     Order[]     @relation("StoreToOrder")
   createdAt  DateTime    @default(now())
@@ -53,10 +53,10 @@ model Category {
   @@index([billboardId])
 }
 
-model Size {
+model Collection {
   id        String    @id @default(uuid())
   storeId   String
-  store     Store     @relation("StoreToSize", fields: [storeId], references: [id])
+  store     Store     @relation("StoreTocollection", fields: [storeId], references: [id])
   name      String
   value     String
   products  Product[]
@@ -66,10 +66,10 @@ model Size {
   @@index([storeId])
 }
 
-model Collor {
+model Publishing {
   id        String    @id @default(uuid())
   storeId   String
-  store     Store     @relation("StoreToCollor", fields: [storeId], references: [id])
+  store     Store     @relation("StoreTopublishing", fields: [storeId], references: [id])
   name      String
   value     String
   products  Product[]
@@ -86,13 +86,19 @@ model Product {
   categoryId String
   category   Category @relation("CategoryToProduct", fields: [categoryId], references: [id])
   name       String
+  description String	@db.Text
+  quantity   Int
   price      Decimal
+  isNew   Boolean  @default(false)
+  isSale   Boolean  @default(false)
+  sale Int
+  isLowQuantity Boolean  @default(false)
   isFeatured Boolean  @default(false)
   isArchived Boolean  @default(false)
-  sizeId     String
-  size       Size     @relation(fields: [sizeId], references: [id])
-  collorId   String
-  collor     Collor   @relation(fields: [collorId], references: [id])
+  collectionId     String
+  collection       Collection     @relation(fields: [collectionId], references: [id])
+  publishingId   String
+  publishing     Publishing   @relation(fields: [publishingId], references: [id])
   images     Image[]
   orderItems OrderItem[]
   createdAt  DateTime @default(now())
@@ -100,8 +106,8 @@ model Product {
 
   @@index([storeId])
   @@index([categoryId])
-  @@index([sizeId])
-  @@index([collorId])
+  @@index([collectionId])
+  @@index([publishingId])
 }
 
 model Image {
@@ -120,6 +126,7 @@ model Order {
     storeId    String
     store      Store       @relation("StoreToOrder", fields: [storeId], references: [id])
     orderItems OrderItem[]
+    status    String
     isPaid     Boolean     @default(false)
     phone      String      @default("")
     address    String      @default("")
@@ -135,6 +142,7 @@ model OrderItem {
   order      Order    @relation(fields: [orderId], references: [id])
   productId  String
   product    Product  @relation(fields: [productId], references: [id])
+  quantity   Int
   
   @@index([orderId])
   @@index([productId])
