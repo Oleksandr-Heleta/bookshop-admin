@@ -88,7 +88,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, billboa
       toast.success("Категорія видалена.");
     } catch (error) {
       toast.error(
-        "Впевніться що всі продукти з даної категорії видалені."
+        "Впевніться що всі товари з даної категорії видалені."
       );
     } finally {
       setLoading(false);

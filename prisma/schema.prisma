@@ -12,17 +12,17 @@ generator client {
 }
 
 model Store {
-  id         String      @id @default(uuid())
-  name       String
-  userId     String
-  billboards Billboard[] @relation("StoreToBillboard")
-  cetegories Category[]  @relation("StoreToCategory")
-  collections      Collection[]      @relation("StoreTocollection")
-  publishings    Publishing[]    @relation("StoreTopublishing")
-  products   Product[]   @relation("StoreToProduct")
-  orders     Order[]     @relation("StoreToOrder")
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id          String       @id @default(uuid())
+  name        String
+  userId      String
+  billboards  Billboard[]  @relation("StoreToBillboard")
+  cetegories  Category[]   @relation("StoreToCategory")
+  collections Collection[] @relation("StoreTocollection")
+  publishings Publishing[] @relation("StoreTopublishing")
+  products    Product[]    @relation("StoreToProduct")
+  orders      Order[]      @relation("StoreToOrder")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Billboard {
@@ -54,14 +54,14 @@ model Category {
 }
 
 model Collection {
-  id        String    @id @default(uuid())
+  id        String                @id @default(uuid())
   storeId   String
-  store     Store     @relation("StoreTocollection", fields: [storeId], references: [id])
+  store     Store                 @relation("StoreTocollection", fields: [storeId], references: [id])
   name      String
   value     String
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  products  CollectionToProduct[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
 
   @@index([storeId])
 }
@@ -80,33 +80,37 @@ model Publishing {
 }
 
 model Product {
-  id         String   @id @default(uuid())
-  storeId    String
-  store      Store    @relation("StoreToProduct", fields: [storeId], references: [id])
-  categoryId String
-  category   Category @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name       String
-  description String	@db.Text
-  quantity   Int
-  price      Decimal
-  isNew   Boolean  @default(false)
-  isSale   Boolean  @default(false)
-  sale Int
-  isLowQuantity Boolean  @default(false)
-  isFeatured Boolean  @default(false)
-  isArchived Boolean  @default(false)
-  collectionId     String
-  collection       Collection     @relation(fields: [collectionId], references: [id])
-  publishingId   String
-  publishing     Publishing   @relation(fields: [publishingId], references: [id])
-  images     Image[]
-  orderItems OrderItem[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String                @id @default(uuid())
+  storeId       String
+  store         Store                 @relation("StoreToProduct", fields: [storeId], references: [id])
+  categoryId    String
+  category      Category              @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name          String
+  description   String                @db.Text
+  sheets        Int
+  size          String
+  titleSheet    String
+  quantity      Int
+  price         Decimal
+  isNew         Boolean               @default(false)
+  isSale        Boolean               @default(false)
+  sale          Int
+  isLowQuantity Boolean               @default(false)
+  isFeatured    Boolean               @default(false)
+  isArchived    Boolean               @default(false)
+  collections   CollectionToProduct[]
+  // collection       Collection     @relation(fields: [collectionId], references: [id])
+  publishingId  String
+  publishing    Publishing            @relation(fields: [publishingId], references: [id])
+  images        Image[]
+  video         String               @default("")
+  orderItems    OrderItem[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
 
   @@index([storeId])
   @@index([categoryId])
-  @@index([collectionId])
+  // @@index([collectionId]) 
   @@index([publishingId])
 }
 
@@ -121,30 +125,44 @@ model Image {
   @@index([productId])
 }
 
-model Order {
-    id         String      @id @default(uuid())
-    storeId    String
-    store      Store       @relation("StoreToOrder", fields: [storeId], references: [id])
-    orderItems OrderItem[]
-    status    String
-    isPaid     Boolean     @default(false)
-    phone      String      @default("")
-    address    String      @default("")
-    createdAt  DateTime    @default(now())
-    updatedAt  DateTime    @updatedAt
+model CollectionToProduct {
+  id           String     @id @default(uuid()) @map("id")
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id])
+  collectionId String
+  collectionName String   @default("")
+  collection   Collection @relation(fields: [collectionId], references: [id])
 
-    @@index([storeId])
-  }
+  @@index([productId])
+  @@index([collectionId])
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  storeId     String
+  store       Store       @relation("StoreToOrder", fields: [storeId], references: [id])
+  orderItems  OrderItem[]
+  name        String
+  totalPrice  Decimal @default(0)
+  orderStatus String  @default("nonPaid")
+  orderState  String  @default("new")
+  isPaid      Boolean     @default(false)
+  phone       String      @default("")
+  address     String      @default("")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([storeId])
+}
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  orderId    String
-  order      Order    @relation(fields: [orderId], references: [id])
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id])
-  quantity   Int
-  
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+
   @@index([orderId])
   @@index([productId])
 }
- 

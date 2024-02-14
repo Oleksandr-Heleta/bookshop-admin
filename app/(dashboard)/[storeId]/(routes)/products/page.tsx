@@ -16,7 +16,7 @@ const ProductsPage = async({params}:{
         },
         include:{
             category: true,
-            collection: true,
+            collections: true,
             publishing: true,
         },
         orderBy:{
@@ -32,10 +32,11 @@ const ProductsPage = async({params}:{
         isNew: item.isNew,
         isFeatured: item.isFeatured,
         isArchived: item.isArchived,
+        isLowQuantity: item.isLowQuantity,
         price: formatter.format(item.price.toNumber()),
         category: item.category.name,
-        collection: item.collection.name,
-        publishing: item.publishing.value,
+        collections: item.collections.map((collection)=>collection.collectionName),
+        publishing: item.publishing.name,
         createdAt: format(item.createdAt, "do MMMM  yyyy"),
     }));
   

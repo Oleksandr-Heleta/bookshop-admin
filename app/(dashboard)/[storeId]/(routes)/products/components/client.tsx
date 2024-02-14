@@ -21,8 +21,8 @@ const params = useParams();
     <>
       <div className="flex items-center justify-between">
         <Heading
-          title={`Продукти(${data.length})`}
-          description="Керуй своїми продуктами тут."
+          title={`Товари(${data.length})`}
+          description="Керуй своїми товарами тут."
         />
         <Button onClick={()=> router.push(`/${params.storeId}/products/new`)}>
             <Plus className="mr-2 h-4 w-4"/>
@@ -31,7 +31,7 @@ const params = useParams();
       </div>
       <Separator/>
       <DataTable searchKey="name" columns={columns} data={data}/>
-      <Heading title="API" description="API для продуктів"/>
+      <Heading title="API" description="API для товарів"/>
       <Separator/>
       <ApiList entityName="products" entityIdName="productId"/>
     </>

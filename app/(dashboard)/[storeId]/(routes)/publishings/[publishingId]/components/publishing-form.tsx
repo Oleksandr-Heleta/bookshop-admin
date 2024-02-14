@@ -85,7 +85,7 @@ export const PublishingForm: React.FC<PublishingFormProps> = ({
       router.push(`/${params.storeId}/publishings`);
       toast.success("Видавництво видалено.");
     } catch (error) {
-      toast.error("Переконайтесь що видалені всі продукти цього видавництва.");
+      toast.error("Переконайтесь що видалені всі товари цього видавництва.");
     } finally {
       setLoading(false);
       setOpen(false);

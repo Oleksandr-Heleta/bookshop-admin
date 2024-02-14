@@ -10,12 +10,13 @@ export type ProductColumn = {
   price: string;
   quantity: number;
   category: string;
-  collection: string;
+  collections: string[];
   publishing: string;
   isSale: boolean;
   isNew: boolean;
   isFeatured: boolean;
   isArchived: boolean;
+  isLowQuantity: boolean;
   createdAt: string;
 };
 
@@ -28,7 +29,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
     accessorKey: "isSale",
     header: "Статус",
     cell: ({row}) =>{
-      return (<div  className="flex flex-col items-center gap-x-2">
+      return (<div  className="flex flex-col items-start gap-x-2">
         {row.original.isNew && <div className="bg-red-700 rounded-2xl text-white px-2 text-[8px]">НОВИНКА</div> }
         {row.original.isSale && <div className="bg-orange-500 rounded-2xl text-white px-2 text-[8px]">АКЦІЯ</div>}
       </div>);
@@ -52,6 +53,14 @@ export const columns: ColumnDef<ProductColumn>[] = [
   {
     accessorKey: "quantity",
     header: "Кількість",
+    cell: ({row})=>{
+      return (
+        <div className="flex flex-row items-start gap-x-2">
+           {row.original.quantity}
+           {row.original.isLowQuantity && <div className="bg-amber-200 rounded-2xl text-white px-2 text-[8px]">ЗАКІНЧУЄТЬСЯ</div>}
+        </div>
+      )
+    }
   },
   {
     accessorKey: "category",
@@ -60,21 +69,20 @@ export const columns: ColumnDef<ProductColumn>[] = [
   {
     accessorKey: "collection",
     header: "Збірка",
+    cell: ({row})=>{
+      console.log(row.original.collections);
+      return row.original.collections.map((i,index)=>{return <div key={index}>{i}</div>;})
+    }
   },
   {
     accessorKey: "publishing",
     header: "Видавництво",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-x-2">
-        {row.original.publishing}
-       
-      </div>
-    ),
+    
   },
-  {
-    accessorKey: "createdAt",
-    header: "Дата",
-  },
+  // {
+  //   accessorKey: "createdAt",
+  //   header: "Дата",
+  // },
   {
     id: "action",
     cell: ({ row }) => <CellAction data={row.original} />,

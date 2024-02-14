@@ -6,6 +6,7 @@ import {
   Image,
   Product,
   Collection,
+  CollectionToProduct
 } from "@prisma/client";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
@@ -39,9 +39,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import MultipleSelector from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import ImageUploadNew from "@/components/image-download";
 import ImageUploader from "@/components/image-uploading";
+
+const optionSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+  disable: z.boolean().optional(),
+});
 
 const formShema = z.object({
   name: z.string().min(1),
@@ -50,22 +57,30 @@ const formShema = z.object({
   quantity: z.coerce.number().positive().min(1),
   categoryId: z.string().min(1),
   publishingId: z.string().min(1),
-  collectionId: z.string().min(1),
+  collections:z.array(optionSchema).min(1),
   description: z.string().min(1),
   isNew: z.boolean().default(false).optional(),
   isSale: z.boolean().default(false).optional(),
-  sale: z.coerce.number().positive().min(1),
+  sale: z.coerce.number().nonnegative().default(0),
   isLowQuantity: z.boolean().default(false).optional(),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  sheets: z.coerce.number().positive().min(1),
+  size: z.string().min(1),
+  titleSheet: z.string().min(1),
+  video: z.string().min(1),
 });
 
 interface ProductFormProps {
-  initialData:
-    | (Product & {
-        images: Image[];
-      })
-    | null;
+  initialData: Product & ({
+            images: Image[];
+            colections: CollectionToProduct[]
+          }) | ({
+                  price: number;
+                }
+            ) | null;
+        
+       
   categories: Category[];
   collections: Collection[];
   publishings: Publishing[];
@@ -79,16 +94,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   collections,
   publishings,
 }) => {
+ 
   const params = useParams();
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Редагування продукту" : "Створення продукту";
+  const title = initialData ? "Редагування товару" : "Створення товару";
   const description = initialData
-    ? "Редагувани продукт"
-    : "Додати новий продукт";
+    ? "Редагувани товар"
+    : "Додати новий товар";
   const toastMessage = initialData ? "Продукт оновлено." : "Продукт створено.";
   const action = initialData ? "Зберегти зміни" : "Створити";
 
@@ -98,6 +114,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       ? {
           ...initialData,
           price: parseFloat(String(initialData?.price)),
+          collections: initialData.collections.map((coll: CollectionToProduct)=>{return {label: coll.collectionName, value: coll.collectionId}})
         }
       : {
           name: "",
@@ -111,12 +128,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           isLowQuantity: false,
           categoryId: "",
           publishingId: "",
-          collectionId: "",
+          collections: [],
           isFeatured: false,
           isArchived: false,
+          sheets: 0,
+          size: "",
+          titleSheet: "",
+          video: "",
         },
   });
 
+  
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
@@ -153,6 +175,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
+  
   return (
     <>
       <AlertModal
@@ -187,7 +210,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             name="images"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Images</FormLabel>
+                <FormLabel>Зображення</FormLabel>
                 <FormControl>
                   <ImageUpload
                     value={field.value.map((image) => image.url)}
@@ -294,32 +317,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="collectionId"
+              name="collections"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Збірка</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Виберіть збірку"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {collections.map((collection) => (
-                        <SelectItem key={collection.id} value={collection.id}>
-                          {collection.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultipleSelector
+                  hidePlaceholderWhenSelected
+                  value={field.value}
+                  disabled={loading}
+                  onChange={field.onChange}
+                  defaultOptions={collections.map((collection)=>{ return {value: collection.id, label: collection.name}})}
+                  placeholder="Select frameworks you like..."
+                  emptyIndicator={
+                    <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                      no results found.
+                    </p>
+                  }
+                />
+               
                   <FormMessage />
                 </FormItem>
               )}
@@ -356,81 +371,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
-            <div className="flex flex-col items-start  space-y-0 rounded-md border ">
             <FormField
               control={form.control}
-              name="isNew"
+              name="sheets"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0  p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Новинка</FormLabel>
-                    <FormDescription>
-                      Цей продукт буде отримає відмітку <span className="bg-red-700 rounded-xl text-white p-2 text-xs">НОВИНКА</span>
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="isLowQuantity"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Закінчується</FormLabel>
-                    <FormDescription>
-                      Цей продукт буде отримає відмітку <span className="bg-amber-200 rounded-xl text-white p-2 text-xs">ЗАКІНЧУЄТЬСЯ</span>
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            </div>
-            <div className="flex flex-col items-start  space-y-0 rounded-md border">
-            <FormField
-              control={form.control}
-              name="isSale"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Акція</FormLabel>
-                    <FormDescription>
-                      Цей продукт отримає відмітку  <span className="bg-orange-500 rounded-xl text-white p-2 text-xs">АКЦІЯ</span>
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="sale"
-              render={({ field }) => (
-                <FormItem className="space-x-3 space-y-0 p-4">
-                  <FormLabel>Відсоток знижки</FormLabel>
+                <FormItem>
+                  <FormLabel>Кількість сторінок</FormLabel>
                   <FormControl>
                     <Input
-                   
                       type="number"
                       disabled={loading}
-                      placeholder="0"
+                      placeholder="1"
                       {...field}
                     />
                   </FormControl>
@@ -438,49 +389,185 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="size"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Розмір</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Розміри книги"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="titleSheet"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Титульна сторінка</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Виберіть титульну сторінку "
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Solid">Тверда</SelectItem>
+                      <SelectItem value="Soft">Мягка</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex flex-col items-start  space-y-0 rounded-md border ">
+              <FormField
+                control={form.control}
+                name="isNew"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0  p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Новинка</FormLabel>
+                      <FormDescription>
+                        Цей товар буде отримає відмітку{" "}
+                        <span className="bg-red-700 rounded-xl text-white p-2 text-xs">
+                          НОВИНКА
+                        </span>
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isLowQuantity"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Закінчується</FormLabel>
+                      <FormDescription>
+                        Цей товар буде отримає відмітку{" "}
+                        <span className="bg-amber-200 rounded-xl text-white p-2 text-xs">
+                          ЗАКІНЧУЄТЬСЯ
+                        </span>
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </div>
             <div className="flex flex-col items-start  space-y-0 rounded-md border">
-            <FormField
-              control={form.control}
-              name="isFeatured"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0  p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Просувати</FormLabel>
-                    <FormDescription>
-                      Цей продукт буде на головній сторінці магазину
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="isArchived"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>В архів</FormLabel>
-                    <FormDescription>
-                      Цей продукт не зявиться в магазині
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-             </div>
+              <FormField
+                control={form.control}
+                name="isSale"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Акція</FormLabel>
+                      <FormDescription>
+                        Цей товар отримає відмітку{" "}
+                        <span className="bg-orange-500 rounded-xl text-white p-2 text-xs">
+                          АКЦІЯ
+                        </span>
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sale"
+                render={({ field }) => (
+                  <FormItem className="space-x-3 space-y-0 p-4">
+                    <FormLabel>Відсоток знижки</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        disabled={loading}
+                        placeholder="0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex flex-col items-start  space-y-0 rounded-md border">
+              <FormField
+                control={form.control}
+                name="isFeatured"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0  p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Просувати</FormLabel>
+                      <FormDescription>
+                        Цей товар буде на головній сторінці магазину
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isArchived"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>В архів</FormLabel>
+                      <FormDescription>
+                        Цей товар не зявиться в магазині
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="description"
@@ -491,6 +578,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <Textarea
                       disabled={loading}
                       placeholder="Опис книги"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="video"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Відео</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="URL відео"
                       {...field}
                     />
                   </FormControl>

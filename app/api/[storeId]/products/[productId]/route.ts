@@ -18,7 +18,7 @@ export async function GET(
         images: true,
         category: true,
         publishing: true,
-        collection: true,
+        collections: true,
       },
     });
 
@@ -45,14 +45,19 @@ export async function PATCH(
       quantity,
       categoryId,
       publishingId,
-      collectionId,
+      collections,
       isNew,
       isSale,
       sale,
       isLowQuantity,
       isFeatured,
       isArchived,
+      sheets,
+      size,
+      titleSheet,
+      video
     } = body;
+    console.log(body);
 
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
     if (!name) {
@@ -72,8 +77,8 @@ export async function PATCH(
     if (!categoryId) {
       return new NextResponse("Category Id is required", { status: 400 });
     }
-    if (!collectionId) {
-      return new NextResponse("collection Id is required", { status: 400 });
+    if (!collections.length) {
+      return new NextResponse("collections is required", { status: 400 });
     }
     if (!publishingId) {
       return new NextResponse("publishing Id is required", { status: 400 });
@@ -103,15 +108,21 @@ export async function PATCH(
         quantity,
         categoryId,
         publishingId,
-        collectionId,
         isNew,
         isSale,
         sale,
         isLowQuantity,
         isFeatured,
         isArchived,
+        sheets,
+        size,
+        titleSheet,
+        video,
         storeId: params.storeId,
         images: {
+          deleteMany: {},
+        },
+        collections: {
           deleteMany: {},
         },
       },
@@ -126,6 +137,11 @@ export async function PATCH(
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
           },
+        },
+        collections: {
+          createMany: {
+            data: [ ...collections.map((collection: {value: string; label: string}) => ({ collectionId: collection.value , collectionName: collection.label}))],
+          }
         },
       },
     });

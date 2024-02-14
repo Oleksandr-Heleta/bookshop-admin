@@ -18,13 +18,17 @@ export async function POST(
       quantity,
       categoryId,
       publishingId,
-      collectionId,
+      collections,
       isNew,
       isSale,
       sale,
       isLowQuantity,
       isFeatured,
       isArchived,
+      sheets,
+      size,
+      titleSheet,
+      video,
     } = body;
 
     if (!userId) {
@@ -45,8 +49,8 @@ export async function POST(
     if (!categoryId) {
       return new NextResponse("Category Id is required", { status: 400 });
     }
-    if (!collectionId) {
-      return new NextResponse("collection Id is required", { status: 400 });
+    if (!collections.length) {
+      return new NextResponse("collections is required", { status: 400 });
     }
     if (!publishingId) {
       return new NextResponse("publishing Id is required", { status: 400 });
@@ -75,13 +79,16 @@ export async function POST(
         quantity,
         categoryId,
         publishingId,
-        collectionId,
         isNew,
         isSale,
         sale,
         isLowQuantity,
         isFeatured,
         isArchived,
+        sheets,
+        size,
+        titleSheet,
+        video,
         storeId: params.storeId,
         images: {
           createMany: {
@@ -89,7 +96,12 @@ export async function POST(
               ...images.map((image: {url: string})=>image)
             ]
           }
-        }
+        },
+        collections: {
+          createMany: {
+            data: [ ...collections.map((collection: {value: string; label: string}) => ({ collectionId: collection.value , collectionName: collection.label}))],
+          }
+        },
       },
     });
 
@@ -120,7 +132,11 @@ export async function GET(
         storeId: params.storeId,
         categoryId,
         publishingId,
-        collectionId,
+        collections: {
+          some: {
+            collectionId: collectionId,
+          },
+        },
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
@@ -128,7 +144,7 @@ export async function GET(
         images: true,
         category: true,
         publishing: true, 
-        collection: true,
+        // collections: true,
       },
       orderBy: {
         createdAt: 'desc'

@@ -10,18 +10,27 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { label, imageUrl } = body;
+    const {name, phone, address, orderItems, orderStatus, isPaid} = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
 
-    if(!label){
-        return new NextResponse("Label is required", { status: 400 });
+    if(!phone){
+        return new NextResponse("Phone is required", { status: 400 });
     }
 
-    if(!imageUrl){
-        return new NextResponse("Image URL is required", { status: 400 });
+    if(!name){
+      return new NextResponse("Name is required", { status: 400 });
+  }
+
+  if(!address){
+    return new NextResponse("Address is required", { status: 400 });
+}
+
+
+    if(!orderItems){
+        return new NextResponse("orderItems is required", { status: 400 });
     }
 
     if(!params.storeId){
@@ -39,40 +48,74 @@ export async function POST(
         return new NextResponse("Unauthorized", { status: 403 });
       }
 
-    const billboard = await prismadb.billboard.create({
-        data:{
-            label,
-            imageUrl,
-            storeId: params.storeId
-        }
-    });
+      const order = await prismadb.order.create({
+        data: {
+          name,
+          phone,
+          address,
+          orderStatus, 
+          isPaid,
+          storeId: params.storeId,
+          orderItems: {
+            create: orderItems, 
+          },
+        },
+        include: {
+          orderItems: true, 
+        },
+      });
 
-    return NextResponse.json(billboard);
+      const updateProductPromises = order.orderItems.map(async (orderItem) => {
+        await prismadb.product.update({
+          where: { id: orderItem.productId },
+          data: {
+            quantity: {
+              decrement: orderItem.quantity, 
+            },
+          },
+        });
+      });
+  
+      await Promise.all(updateProductPromises);
+
+    return NextResponse.json(order);
   } catch (error) {
-    console.log("[BILLBOARD_POST]", error);
+    console.log("[ORDER_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
 
 export async function GET(
-    req: Request,
-     {params} : {params: {storeId: string}}
-     ) {
+  req: Request,
+  { params }: { params: { storeId: string } }
+) {
   try {
-    
-    if(!params.storeId){
-        return new NextResponse("Store ID is required", { status: 400 });
+    const {searchParams} = new URL (req.url);
+    const categoryId = searchParams.get('categoryId') || undefined;
+    const collectionId = searchParams.get('collectionId') || undefined;
+    const publishingId = searchParams.get('publishingId') || undefined;
+    const isFeatured = searchParams.get('isFeatured');
+
+    if (!params.storeId) {
+      return new NextResponse("Store ID is required", { status: 400 });
     }
 
-    const billboards = await prismadb.billboard.findMany({
-        where:{
-            storeId: params.storeId
-        }
+    const orders = await prismadb.order.findMany({
+      where: {
+        storeId: params.storeId,
+       
+      },
+      include: {
+        orderItems: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
-    return NextResponse.json(billboards);
+    return NextResponse.json(orders);
   } catch (error) {
-    console.log("[BILLBOARD_GET]", error);
+    console.log("[ORDERS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

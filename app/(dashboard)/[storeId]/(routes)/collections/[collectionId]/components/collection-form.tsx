@@ -85,7 +85,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
       router.push(`/${params.storeId}/collections`);
       toast.success("Збірка видалена.");
     } catch (error) {
-      toast.error("Переконайтесь що всі продукти даної збірки видалені.");
+      toast.error("Переконайтесь що всі товари даної збірки видалені.");
     } finally {
       setLoading(false);
       setOpen(false);

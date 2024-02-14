@@ -27,9 +27,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const onCopy = (id: string) => {
-    navigator.clipboard.writeText(id);
-    toast.success("Id скопійовано.");
+  const onCopy = (data: OrderColumn) => {
+    const text = `
+    П.І.Б: ${data.name}; 
+    тел.: ${data.phone};
+    адреса: ${data.address};
+    товари: ${data.products};
+    на суму: ${data.totalPrice}.`;
+    navigator.clipboard.writeText(text);
+    toast.success("Дані скопійовано.");
   };
 
   const onDelete = async () => {
@@ -67,7 +73,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onCopy(data.id)}>
+          <DropdownMenuItem onClick={() => onCopy(data)}>
             <Copy className="mr-2 h-4 w-4" />
             Copy 
           </DropdownMenuItem>

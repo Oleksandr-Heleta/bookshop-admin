@@ -39,7 +39,7 @@ export function MainNav({
     },
     {
       href: `/${params.storeId}/products`,
-      label: "Продукти",
+      label: "Товари",
       active: pathname === `/${params.storeId}/products`,
     },
     {

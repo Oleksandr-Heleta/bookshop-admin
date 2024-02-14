@@ -46,7 +46,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 type="button"
                 onClick={() => onRemove(url)}
                 variant="destructive"
-                collection="icon"
+                size="icon"
               >
                 <Trash className="h-4 w-4" />
               </Button>
@@ -69,7 +69,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               onClick={onClick}
             >
               <ImagePlus className="h-4 w-4 mr-2" />
-              Завантаж зображення
+              Завантажити зображення
             </Button>
           );
         }}
