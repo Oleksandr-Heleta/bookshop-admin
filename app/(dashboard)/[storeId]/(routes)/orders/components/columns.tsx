@@ -2,16 +2,19 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { CellAction } from "./cell-action"
+import { statuses, states } from "@/lib/utils";
 
 
 export type OrderColumn = {
-  id: string
-  name: string
-  phone: string
-  address: string
-  isPaid: boolean
-  totalPrice: string
-  products: string
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  isPaid: boolean;
+  totalPrice: string;
+  products: string[];
+  orderStatus: string;
+  orderState: string;
   createdAt: string;
 
 }
@@ -19,7 +22,9 @@ export type OrderColumn = {
 export const columns: ColumnDef<OrderColumn>[] = [
   {
     accessorKey: "products",
-    header: "Товари",              
+    header: "Товари",
+    cell: ({row})=>{
+        return row.original.products.map((i,index)=>{return <div key={index}>{i}</div>;})   }  
   },
   {
     accessorKey: "name",
@@ -39,8 +44,18 @@ export const columns: ColumnDef<OrderColumn>[] = [
   },
 
   {
-    accessorKey: "orderStatus",
+    accessorKey: "orderState",
     header: "Стан",
+    cell: ({row})=>{
+      return states.find(state => state.value === row.original.orderState)?.name;
+     }
+  },
+  {
+   accessorKey: "orderStatus",
+   header: "Стаус",
+   cell: ({row})=>{
+    return statuses.find(stat => stat.value === row.original.orderStatus)?.name;
+   }
   },
   {
     id: "action",

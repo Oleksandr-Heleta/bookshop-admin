@@ -18,7 +18,7 @@ export async function GET(
         images: true,
         category: true,
         publishing: true,
-        collections: true,
+        ageGroups: true,
       },
     });
 
@@ -45,7 +45,7 @@ export async function PATCH(
       quantity,
       categoryId,
       publishingId,
-      collections,
+      ageGroups,
       isNew,
       isSale,
       sale,
@@ -57,7 +57,7 @@ export async function PATCH(
       titleSheet,
       video
     } = body;
-    console.log(body);
+   
 
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
     if (!name) {
@@ -77,8 +77,8 @@ export async function PATCH(
     if (!categoryId) {
       return new NextResponse("Category Id is required", { status: 400 });
     }
-    if (!collections.length) {
-      return new NextResponse("collections is required", { status: 400 });
+    if (!ageGroups.length) {
+      return new NextResponse("ageGroups is required", { status: 400 });
     }
     if (!publishingId) {
       return new NextResponse("publishing Id is required", { status: 400 });
@@ -122,7 +122,7 @@ export async function PATCH(
         images: {
           deleteMany: {},
         },
-        collections: {
+        ageGroups: {
           deleteMany: {},
         },
       },
@@ -138,9 +138,9 @@ export async function PATCH(
             data: [...images.map((image: { url: string }) => image)],
           },
         },
-        collections: {
+        ageGroups: {
           createMany: {
-            data: [ ...collections.map((collection: {value: string; label: string}) => ({ collectionId: collection.value , collectionName: collection.label}))],
+            data: [ ...ageGroups.map((ageGroup: {value: string; label: string}) => ({ ageGroupId: ageGroup.value , ageGroupName: ageGroup.label}))],
           }
         },
       },

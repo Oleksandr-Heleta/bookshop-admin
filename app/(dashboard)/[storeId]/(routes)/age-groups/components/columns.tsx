@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { CellAction } from "./cell-action"
 
 
-export type CollectionColumn = {
+export type AgeGroupColumn = {
   id: string
   name: string
   value: string
@@ -12,7 +12,7 @@ export type CollectionColumn = {
 
 }
 
-export const columns: ColumnDef<CollectionColumn>[] = [
+export const columns: ColumnDef<AgeGroupColumn>[] = [
   {
     accessorKey: "name",
     header: "Назва",

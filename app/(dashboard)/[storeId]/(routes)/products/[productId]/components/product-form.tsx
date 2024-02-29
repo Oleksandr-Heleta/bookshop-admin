@@ -5,8 +5,8 @@ import {
   Publishing,
   Image,
   Product,
-  Collection,
-  CollectionToProduct
+  AgeGroup,
+  AgeGroupToProduct
 } from "@prisma/client";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ const formShema = z.object({
   quantity: z.coerce.number().positive().min(1),
   categoryId: z.string().min(1),
   publishingId: z.string().min(1),
-  collections:z.array(optionSchema).min(1),
+  ageGroups:z.array(optionSchema).min(1),
   description: z.string().min(1),
   isNew: z.boolean().default(false).optional(),
   isSale: z.boolean().default(false).optional(),
@@ -74,7 +74,7 @@ const formShema = z.object({
 interface ProductFormProps {
   initialData: Product & ({
             images: Image[];
-            colections: CollectionToProduct[]
+            colections: AgeGroupToProduct[]
           }) | ({
                   price: number;
                 }
@@ -82,7 +82,7 @@ interface ProductFormProps {
         
        
   categories: Category[];
-  collections: Collection[];
+  ageGroups: AgeGroup[];
   publishings: Publishing[];
 }
 
@@ -91,7 +91,7 @@ type ProductFormValues = z.infer<typeof formShema>;
 export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
   categories,
-  collections,
+  ageGroups,
   publishings,
 }) => {
  
@@ -114,7 +114,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       ? {
           ...initialData,
           price: parseFloat(String(initialData?.price)),
-          collections: initialData.collections.map((coll: CollectionToProduct)=>{return {label: coll.collectionName, value: coll.collectionId}})
+          ageGroups: initialData.ageGroups.map((coll: AgeGroupToProduct)=>{return {label: coll.ageGroupName, value: coll.ageGroupId}})
         }
       : {
           name: "",
@@ -128,7 +128,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           isLowQuantity: false,
           categoryId: "",
           publishingId: "",
-          collections: [],
+          ageGroups: [],
           isFeatured: false,
           isArchived: false,
           sheets: 0,
@@ -317,17 +317,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="collections"
+              name="ageGroups"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Збірка</FormLabel>
+                  <FormLabel>Вік</FormLabel>
                   <MultipleSelector
                   hidePlaceholderWhenSelected
                   value={field.value}
                   disabled={loading}
                   onChange={field.onChange}
-                  defaultOptions={collections.map((collection)=>{ return {value: collection.id, label: collection.name}})}
-                  placeholder="Select frameworks you like..."
+                  defaultOptions={ageGroups.map((ageGroup)=>{ return {value: ageGroup.id, label: ageGroup.name}})}
+                  placeholder="Оберіть вікові групи"
                   emptyIndicator={
                     <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
                       no results found.
@@ -411,7 +411,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               name="titleSheet"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Титульна сторінка</FormLabel>
+                  <FormLabel>Обкладинка</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
@@ -422,7 +422,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       <SelectTrigger>
                         <SelectValue
                           defaultValue={field.value}
-                          placeholder="Виберіть титульну сторінку "
+                          placeholder="Виберіть обкладинку "
                         />
                       </SelectTrigger>
                     </FormControl>

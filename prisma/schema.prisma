@@ -17,7 +17,7 @@ model Store {
   userId      String
   billboards  Billboard[]  @relation("StoreToBillboard")
   cetegories  Category[]   @relation("StoreToCategory")
-  collections Collection[] @relation("StoreTocollection")
+  ageGroups AgeGroup[] @relation("StoreToageGroup")
   publishings Publishing[] @relation("StoreTopublishing")
   products    Product[]    @relation("StoreToProduct")
   orders      Order[]      @relation("StoreToOrder")
@@ -53,13 +53,13 @@ model Category {
   @@index([billboardId])
 }
 
-model Collection {
+model AgeGroup {
   id        String                @id @default(uuid())
   storeId   String
-  store     Store                 @relation("StoreTocollection", fields: [storeId], references: [id])
+  store     Store                 @relation("StoreToageGroup", fields: [storeId], references: [id])
   name      String
   value     String
-  products  CollectionToProduct[]
+  products  AgeGroupToProduct[]
   createdAt DateTime              @default(now())
   updatedAt DateTime              @updatedAt
 
@@ -98,8 +98,8 @@ model Product {
   isLowQuantity Boolean               @default(false)
   isFeatured    Boolean               @default(false)
   isArchived    Boolean               @default(false)
-  collections   CollectionToProduct[]
-  // collection       Collection     @relation(fields: [collectionId], references: [id])
+  ageGroups   AgeGroupToProduct[]
+  // ageGroup       ageGroup     @relation(fields: [ageGroupId], references: [id])
   publishingId  String
   publishing    Publishing            @relation(fields: [publishingId], references: [id])
   images        Image[]
@@ -110,7 +110,7 @@ model Product {
 
   @@index([storeId])
   @@index([categoryId])
-  // @@index([collectionId]) 
+  // @@index([ageGroupId]) 
   @@index([publishingId])
 }
 
@@ -125,16 +125,16 @@ model Image {
   @@index([productId])
 }
 
-model CollectionToProduct {
+model AgeGroupToProduct {
   id           String     @id @default(uuid()) @map("id")
   productId    String
   product      Product    @relation(fields: [productId], references: [id])
-  collectionId String
-  collectionName String   @default("")
-  collection   Collection @relation(fields: [collectionId], references: [id])
+  ageGroupId String
+  ageGroupName String   @default("")
+  ageGroup   AgeGroup @relation(fields: [ageGroupId], references: [id])
 
   @@index([productId])
-  @@index([collectionId])
+  @@index([ageGroupId])
 }
 
 model Order {
@@ -144,8 +144,8 @@ model Order {
   orderItems  OrderItem[]
   name        String
   totalPrice  Decimal @default(0)
-  orderStatus String  @default("nonPaid")
-  orderState  String  @default("new")
+  orderStatus String  @default("")
+  orderState  String  @default("")
   isPaid      Boolean     @default(false)
   phone       String      @default("")
   address     String      @default("")

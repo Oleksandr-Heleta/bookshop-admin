@@ -9,3 +9,16 @@ export const formatter = new Intl.NumberFormat("uk-UA", {
   currency: "UAH",
   style: "currency",
 });
+
+
+export const statuses = [
+  { name: "Не оброблено", value: "new" },
+  { name: "Зпаковано", value: "ready" },
+  { name: "Відправлено", value: "sended" },
+];
+
+export const states =  [
+  { name: "Накладений платіж", value: "afterrecive" },
+  { name: "Оплачено", value: "paided" },
+  { name: "Не оплачено", value: "nonpaid" },
+];

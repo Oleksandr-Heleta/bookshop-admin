@@ -32,7 +32,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     П.І.Б: ${data.name}; 
     тел.: ${data.phone};
     адреса: ${data.address};
-    товари: ${data.products};
+    товари: ${data.products.join('\n')};
     на суму: ${data.totalPrice}.`;
     navigator.clipboard.writeText(text);
     toast.success("Дані скопійовано.");

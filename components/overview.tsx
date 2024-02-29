@@ -15,13 +15,13 @@ export const Overview: React.FC<OverviewProps> = ({
         <XAxis
           dataKey="name"
           stroke="#888888"
-          fontcollection={12}
+          fontsize={12}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
           stroke="#888888"
-          fontcollection={12}
+          fontsize={12}
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => `$${value}`}

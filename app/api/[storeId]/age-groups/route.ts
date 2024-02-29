@@ -39,7 +39,7 @@ export async function POST(
         return new NextResponse("Unauthorized", { status: 403 });
       }
 
-    const collection = await prismadb.collection.create({
+    const ageGroup = await prismadb.ageGroup.create({
         data:{
             name,
             value,
@@ -47,9 +47,9 @@ export async function POST(
         }
     });
 
-    return NextResponse.json(collection);
+    return NextResponse.json(ageGroup);
   } catch (error) {
-    console.log("[collection_POST]", error);
+    console.log("[ageGroup_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -64,15 +64,15 @@ export async function GET(
         return new NextResponse("Store ID is required", { status: 400 });
     }
 
-    const collection = await prismadb.collection.findMany({
+    const ageGroup = await prismadb.ageGroup.findMany({
         where:{
             storeId: params.storeId
         }
     });
 
-    return NextResponse.json(collection);
+    return NextResponse.json(ageGroup);
   } catch (error) {
-    console.log("[collection_GET]", error);
+    console.log("[ageGroup_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

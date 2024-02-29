@@ -337,7 +337,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 <Badge
                   key={option.value}
                   className={cn(
-                    'data-[disabled]:bg-white data-[disabled]:text-black data-[disabled]:hover:border-black',
+                    'data-[disabled]:bg-slate-300 data-[disabled]:text-black data-[disabled]:hover:border-black',
                     'data-[fixed]:bg-muted-white data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground',
                     
                     badgeClassName,

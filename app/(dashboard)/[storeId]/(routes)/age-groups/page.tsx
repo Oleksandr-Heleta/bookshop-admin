@@ -1,15 +1,15 @@
 import {format} from "date-fns"
 
 import prismadb from "@/lib/prismadb";
-import { CollectionClient } from "./components/client";
-import { CollectionColumn } from "./components/columns";
+import { AgeGroupClient } from "./components/client";
+import { AgeGroupColumn } from "./components/columns";
 
-const CollectionsPage = async({params}:{
+const AgeGroupsPage = async({params}:{
     params: {
         storeId: string;
     };
 }) => {
-    const collections = await prismadb.collection.findMany({
+    const ageGroups = await prismadb.ageGroup.findMany({
         where:{
             storeId: params.storeId
         },
@@ -18,7 +18,7 @@ const CollectionsPage = async({params}:{
         }
     });
 
-    const formattedcollections : CollectionColumn[] = collections.map((item) => ({
+    const formattedAgeGroups : AgeGroupColumn[] = ageGroups.map((item) => ({
         id: item.id,
         name: item.name,
         value: item.value,
@@ -29,11 +29,11 @@ const CollectionsPage = async({params}:{
     return (
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
-            <CollectionClient data={formattedcollections}/>
+            <AgeGroupClient data={formattedAgeGroups}/>
             </div>
            
         </div>
     );
 };
 
-export default CollectionsPage;
+export default AgeGroupsPage;

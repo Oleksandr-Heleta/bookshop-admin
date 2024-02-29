@@ -1,6 +1,6 @@
 "use client";
 
-import { Collection } from "@prisma/client";
+import { AgeGroup } from "@prisma/client";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
@@ -29,13 +29,13 @@ const formShema = z.object({
   value: z.string().min(1),
 });
 
-interface CollectionFormProps {
-  initialData: Collection | null;
+interface AgeGroupFormProps {
+  initialData: AgeGroup | null;
 }
 
-type CollectionFormValues = z.infer<typeof formShema>;
+type AgeGroupFormValues = z.infer<typeof formShema>;
 
-export const CollectionForm: React.FC<CollectionFormProps> = ({
+export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({
   initialData,
 }) => {
   const params = useParams();
@@ -44,14 +44,14 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Редагування збірки" : "Створення збірки";
-  const description = initialData ? "Редагуйте збірку" : "Додайте збірку";
+  const title = initialData ? "Редагування вікової групи" : "Створення вікової групи";
+  const description = initialData ? "Редагуйте вікову групу" : "Додайте вікову групу";
   const toastMessage = initialData
-    ? "Збірка оновлена."
-    : "Збірка створена.";
+    ? "Вікова група оновлена."
+    : "Вікова група створена.";
   const action = initialData ? "Зберегти зміни" : "Створити";
 
-  const form = useForm<CollectionFormValues>({
+  const form = useForm<AgeGroupFormValues>({
     resolver: zodResolver(formShema),
     defaultValues: initialData || {
       name: "",
@@ -59,16 +59,16 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
     },
   });
 
-  const onSubmit = async (data: CollectionFormValues) => {
+  const onSubmit = async (data: AgeGroupFormValues) => {
     try {
       setLoading(true);
       if(initialData) {
-      await axios.patch(`/api/${params.storeId}/collections/${params.collectionId}`, data);
+      await axios.patch(`/api/${params.storeId}/age-groups/${params.ageGroupId}`, data);
       } else {
-        await axios.post(`/api/${params.storeId}/collections`, data);
+        await axios.post(`/api/${params.storeId}/age-groups`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/collections`);
+      router.push(`/${params.storeId}/age-groups`);
       toast.success(toastMessage);
     } catch (error) {
       toast.error("Щось пішло не так!");
@@ -80,12 +80,12 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/${params.storeId}/collections/${params.collectionId}`);
+      await axios.delete(`/api/${params.storeId}/age-groups/${params.ageGroupId}`);
       router.refresh();
-      router.push(`/${params.storeId}/collections`);
-      toast.success("Збірка видалена.");
+      router.push(`/${params.storeId}/age-groups`);
+      toast.success("вікова група видалена.");
     } catch (error) {
-      toast.error("Переконайтесь що всі товари даної збірки видалені.");
+      toast.error("Переконайтесь що всі товари даної вікової групи видалені видалені.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -130,7 +130,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Назва збірки"
+                      placeholder="Назва вікової групи"
                       {...field}
                     />
                   </FormControl>
@@ -147,7 +147,7 @@ export const CollectionForm: React.FC<CollectionFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Значення збірки"
+                      placeholder="Значення вікової групи"
                       {...field}
                     />
                   </FormControl>

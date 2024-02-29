@@ -64,8 +64,8 @@ export async function POST(
        const session = await stripe.checkout.sessions.create({
          line_items,
          mode: 'payment',
-         billing_address_collection: 'required',
-         phone_number_collection: {
+         billing_address_ageGroup: 'required',
+         phone_number_ageGroup: {
             enabled: true,
          },
          success_url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`,

@@ -1,5 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import { OrderForm } from "./components/order-form";
+import { Product } from "@prisma/client";
 
 const OrderPage = async ({
   params,
@@ -27,7 +28,14 @@ const OrderPage = async ({
     }
   });
 
- 
+ const formattedProducts = (products: Product[]) => {
+  return products.map(product => {return {
+    id: product.id,
+    name : product.name,
+    quantity: product.quantity,
+    price: parseFloat(String(product?.price)),
+       };})
+ }
 
   return (
     <div className="flex-col">

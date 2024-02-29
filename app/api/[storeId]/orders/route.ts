@@ -10,7 +10,7 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const {name, phone, address, orderItems, orderStatus, isPaid} = body;
+    const {name, phone, address, orderItems, orderState, orderStatus, isPaid, totalPrice} = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
@@ -53,8 +53,10 @@ export async function POST(
           name,
           phone,
           address,
-          orderStatus, 
+          orderStatus,
+          orderState, 
           isPaid,
+          totalPrice,
           storeId: params.storeId,
           orderItems: {
             create: orderItems, 
@@ -91,10 +93,7 @@ export async function GET(
 ) {
   try {
     const {searchParams} = new URL (req.url);
-    const categoryId = searchParams.get('categoryId') || undefined;
-    const collectionId = searchParams.get('collectionId') || undefined;
-    const publishingId = searchParams.get('publishingId') || undefined;
-    const isFeatured = searchParams.get('isFeatured');
+   
 
     if (!params.storeId) {
       return new NextResponse("Store ID is required", { status: 400 });

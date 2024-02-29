@@ -16,7 +16,7 @@ const ProductsPage = async({params}:{
         },
         include:{
             category: true,
-            collections: true,
+            ageGroups: true,
             publishing: true,
         },
         orderBy:{
@@ -35,7 +35,7 @@ const ProductsPage = async({params}:{
         isLowQuantity: item.isLowQuantity,
         price: formatter.format(item.price.toNumber()),
         category: item.category.name,
-        collections: item.collections.map((collection)=>collection.collectionName),
+        ageGroups: item.ageGroups.map((ageGroup)=>ageGroup.ageGroupName),
         publishing: item.publishing.name,
         createdAt: format(item.createdAt, "do MMMM  yyyy"),
     }));

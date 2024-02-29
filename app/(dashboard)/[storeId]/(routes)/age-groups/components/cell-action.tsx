@@ -7,7 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { collectionColumn } from "./columns";
+import { AgeGroupColumn } from "./columns";
 import { Button } from "@/components/ui/button";
 import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -17,7 +17,7 @@ import { useState } from "react";
 import { AlertModal } from "@/components/modals/alert-modal";
 
 interface CellActionProps {
-  data: collectionColumn;
+  data: AgeGroupColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
@@ -29,20 +29,20 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onCopy = (id: string) => {
     navigator.clipboard.writeText(id);
-    toast.success("collection Id copied to the clipboard.");
+    toast.success("Id Групи зкопійовано.");
   };
 
   const onDelete = async () => {
     try {
       setLoading(true);
       await axios.delete(
-        `/api/${params.storeId}/collections/${data.id}`
+        `/api/${params.storeId}/age-groups/${data.id}`
       );
       router.refresh();
-      toast.success("collection deleted.");
+      toast.success("Вікова група видалена.");
     } catch (error) {
       toast.error(
-        "Make sure you removed all products using this collection first"
+        "Впевніться що ви видалили всі продукти даної вікової групи."
       );
     } finally {
       setLoading(false);
@@ -73,7 +73,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/${params.storeId}/collections/${data.id}`)
+              router.push(`/${params.storeId}/age-groups/${data.id}`)
             }
           >
             <Edit className="mr-2 h-4 w-4" />

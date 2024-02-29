@@ -15,7 +15,7 @@ const ProductPage = async ({
     },
     include: {
       images: true,
-      collections: true,
+      ageGroups: true,
     },
   });
 
@@ -25,7 +25,7 @@ const ProductPage = async ({
     },
   });
 
-  const collections = await prismadb.collection.findMany({
+  const ageGroups = await prismadb.ageGroup.findMany({
     where: {
       storeId: params.storeId,
     },
@@ -42,7 +42,7 @@ const ProductPage = async ({
       <div className="flex-1 space-y-4 p-8 pt-6">
         <ProductForm
           categories={categories}
-          collections={collections}
+          ageGroups={ageGroups}
           publishings={publishings}
           initialData={product ? {...product, price: parseFloat(String(product?.price)),} : null}
         />

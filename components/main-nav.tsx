@@ -28,9 +28,9 @@ export function MainNav({
       active: pathname === `/${params.storeId}/categories`,
     },
     {
-      href: `/${params.storeId}/collections`,
-      label: "Збірки",
-      active: pathname === `/${params.storeId}/collections`,
+      href: `/${params.storeId}/age-groups`,
+      label: "Вік",
+      active: pathname === `/${params.storeId}/age-groups`,
     },
     {
       href: `/${params.storeId}/publishings`,

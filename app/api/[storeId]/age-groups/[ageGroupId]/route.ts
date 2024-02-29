@@ -4,23 +4,23 @@ import { NextResponse } from "next/server";
 
 export async function GET(
     req: Request,
-    { params }: { params: { collectionId: string} }
+    { params }: { params: { ageGroupId: string} }
   ) {
     try {
     
-      if(!params.collectionId) return new NextResponse("collection ID is required", { status: 400 });
+      if(!params.ageGroupId) return new NextResponse("ageGroup ID is required", { status: 400 });
 
-      const collection = await prismadb.collection.findUnique({
+      const ageGroup = await prismadb.ageGroup.findUnique({
           where: {
-              id: params.collectionId,
+              id: params.ageGroupId,
           },
         
       })
   
-      return  NextResponse.json(collection);
+      return  NextResponse.json(ageGroup);
   
     } catch (error) {
-      console.log("[collection_GET]", error);
+      console.log("[ageGroup_GET]", error);
       return new NextResponse("Internal Error", { status: 500 });
     }
   };
@@ -28,7 +28,7 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: {storeId: string, collectionId: string } }
+  { params }: { params: {storeId: string, ageGroupId: string } }
 ) {
   try {
     const { userId } = auth();
@@ -39,7 +39,7 @@ export async function PATCH(
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
     if (!name) return new NextResponse("Name is required", { status: 400 });
     if (!value) return new NextResponse("Value is required", { status: 400 });
-    if(!params.collectionId) return new NextResponse("collection ID is required", { status: 400 });
+    if(!params.ageGroupId) return new NextResponse("ageGroup ID is required", { status: 400 });
 
     const storeByUserId = await prismadb.store.findFirst({
         where:{
@@ -52,9 +52,9 @@ export async function PATCH(
         return new NextResponse("Unauthorized", { status: 403 });
       }
 
-    const collection = await prismadb.collection.updateMany({
+    const ageGroup = await prismadb.ageGroup.updateMany({
         where: {
-            id: params.collectionId,
+            id: params.ageGroupId,
         },
         data: {
             name,
@@ -62,24 +62,24 @@ export async function PATCH(
         }
     })
 
-    return  NextResponse.json(collection);
+    return  NextResponse.json(ageGroup);
 
   } catch (error) {
-    console.log("[collection_PACH]", error);
+    console.log("[ageGroup_PACH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { storeId: string, collectionId: string} }
+    { params }: { params: { storeId: string, ageGroupId: string} }
   ) {
     try {
       const { userId } = auth();
         
       if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
    
-      if(!params.collectionId) return new NextResponse("collection ID is required", { status: 400 });
+      if(!params.ageGroupId) return new NextResponse("ageGroup ID is required", { status: 400 });
 
       const storeByUserId = await prismadb.store.findFirst({
         where:{
@@ -92,17 +92,17 @@ export async function DELETE(
         return new NextResponse("Unauthorized", { status: 403 });
       }
   
-      const collection = await prismadb.collection.deleteMany({
+      const ageGroup = await prismadb.ageGroup.deleteMany({
           where: {
-              id: params.collectionId,
+              id: params.ageGroupId,
           },
         
       })
   
-      return  NextResponse.json(collection);
+      return  NextResponse.json(ageGroup);
   
     } catch (error) {
-      console.log("collection_DELETE]", error);
+      console.log("ageGroup_DELETE]", error);
       return new NextResponse("Internal Error", { status: 500 });
     }
   };

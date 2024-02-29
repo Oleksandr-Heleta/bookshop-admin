@@ -18,7 +18,7 @@ export async function POST(
       quantity,
       categoryId,
       publishingId,
-      collections,
+      ageGroups,
       isNew,
       isSale,
       sale,
@@ -49,8 +49,8 @@ export async function POST(
     if (!categoryId) {
       return new NextResponse("Category Id is required", { status: 400 });
     }
-    if (!collections.length) {
-      return new NextResponse("collections is required", { status: 400 });
+    if (!ageGroups.length) {
+      return new NextResponse("ageGroups is required", { status: 400 });
     }
     if (!publishingId) {
       return new NextResponse("publishing Id is required", { status: 400 });
@@ -97,9 +97,9 @@ export async function POST(
             ]
           }
         },
-        collections: {
+        ageGroups: {
           createMany: {
-            data: [ ...collections.map((collection: {value: string; label: string}) => ({ collectionId: collection.value , collectionName: collection.label}))],
+            data: [ ...ageGroups.map((ageGroup: {value: string; label: string}) => ({ ageGroupId: ageGroup.value , ageGroupName: ageGroup.label}))],
           }
         },
       },
@@ -119,7 +119,7 @@ export async function GET(
   try {
     const {searchParams} = new URL (req.url);
     const categoryId = searchParams.get('categoryId') || undefined;
-    const collectionId = searchParams.get('collectionId') || undefined;
+    const ageGroupId = searchParams.get('ageGroupId') || undefined;
     const publishingId = searchParams.get('publishingId') || undefined;
     const isFeatured = searchParams.get('isFeatured');
 
@@ -132,9 +132,9 @@ export async function GET(
         storeId: params.storeId,
         categoryId,
         publishingId,
-        collections: {
+        ageGroups: {
           some: {
-            collectionId: collectionId,
+            ageGroupId: ageGroupId,
           },
         },
         isFeatured: isFeatured ? true : undefined,
@@ -144,7 +144,7 @@ export async function GET(
         images: true,
         category: true,
         publishing: true, 
-        // collections: true,
+        // ageGroups: true,
       },
       orderBy: {
         createdAt: 'desc'

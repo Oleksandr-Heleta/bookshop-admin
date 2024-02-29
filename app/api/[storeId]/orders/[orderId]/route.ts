@@ -35,7 +35,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const {name, phone, address, orderItems, orderStatus, isPaid} = body;
+    const {name, phone, address, orderItems, orderStatus, orderState, isPaid, totalPrice} = body;
 
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
    
@@ -118,7 +118,9 @@ export async function PATCH(
         phone,
         address,
         orderStatus,
+        orderState,
         isPaid,
+        totalPrice,
         orderItems: {
           // Видалення старих orderItems та додавання кількості в товари
           deleteMany: {},

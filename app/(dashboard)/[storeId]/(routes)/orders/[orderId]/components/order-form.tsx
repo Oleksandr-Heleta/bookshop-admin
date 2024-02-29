@@ -46,16 +46,23 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { Decimal } from "@prisma/client/runtime/library";
+import { statuses, states } from "@/lib/utils";
+
+const phoneRegex = /^\+380\d{9}$/;
 
 const orderItemSchema = z.object({
   productId: z.string(),
-  quantity: z.number().min(1),
+  quantity: z.coerce.number().positive().min(1),
 });
 
 const orderSchema = z.object({
   name: z.string().min(1),
   orderStatus: z.string().min(1),
-  phone: z.string().min(7),
+  orderState: z.string().min(1), 
+  phone: z.string().refine(value => phoneRegex.test(value), {
+    message: 'Телефон повинен бути у форматі +380000000000',
+  }),
   address: z.string().min(1),
   orderItems: z.array(orderItemSchema),
   isPaid: z.boolean().default(false),
@@ -68,9 +75,7 @@ interface OrderFormProps {
       })
     | null;
 
-  products: Product[] & {
-    images: Image[];
-  };
+  products:  Product[];
 }
 
 type OrderFormValues = z.infer<typeof orderSchema>;
@@ -85,12 +90,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const statuses = [
-    { name: "Нове замовлення", value: "recived" },
-    { name: "Оплачено", value: "paided" },
-    { name: "Відправлено", value: "sended" },
-    { name: "Відхилено", value: "canceled" },
-  ];
+ 
 
   const title = initialData ? "Редагування замовлення" : "Створення замовлення";
   const description = initialData
@@ -113,8 +113,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           orderItems: [{ productId: "", quantity: 1 }],
           name: "",
           orderStatus: "",
+          orderState: "",
           isPaid: false,
-          phone: "",
+          phone: "+380",
           address: "",
         },
   });
@@ -125,7 +126,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       { productId: "", quantity: 1 },
     ]);
     router.refresh();
-    console.log(form.getValues("orderItems"));
+   
   };
 
   const removeOrderItem = (index: number) => {
@@ -139,15 +140,22 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const onSubmit = async (data: OrderFormValues) => {
     try {
       setLoading(true);
+      const totalPrice = data.orderItems.reduce((total, item) =>  {
+        const product = products.find((product) => product.id === item.productId);
+        const lastPrice: number | Decimal = product?.isSale ? Number(product.price) *(100 - product.sale) / 100 : Number(product?.price) ?? 0;
+        return total + (lastPrice * Number(item.quantity)); 
+      }, 0);
+      
+
       if (initialData) {
-        console.log(data);
-        console.log(data.orderItems.map((item)=>typeof item.quantity));
+        
         await axios.patch(
           `/api/${params.storeId}/orders/${params.orderId}`,
-          data
+          {...data, totalPrice}
         );
       } else {
-        await axios.post(`/api/${params.storeId}/orders`, data);
+        await axios.post(`/api/${params.storeId}/orders`,
+        {...data, totalPrice});
       }
       router.refresh();
       router.push(`/${params.storeId}/orders`);
@@ -173,6 +181,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       setOpen(false);
     }
   };
+
 
   return (
     <>
@@ -238,7 +247,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                           />
                           <CommandEmpty>Продукт не знайдено.</CommandEmpty>
                           <CommandGroup>
-                            {products.map((product) => (
+                            {products.map((product) => !product.isArchived &&(
                               <CommandItem
                                 value={product.name}
                                 key={product.id}
@@ -276,8 +285,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     <FormLabel>Кількість</FormLabel>
                     <FormControl>
                       <Input 
-                          
                       type="number"
+                      max={initialData ? 
+                        ((products.find(product => product.id === item.productId))?.quantity ?? 0) + Number(initialData.orderItems.find(orderItem => orderItem.productId == item.productId)?.quantity)
+                         : (products.find(product => product.id === item.productId))?.quantity}
                       disabled={loading} 
                       value={field.value.toString()} 
                       onChange={(e) => field.onChange(parseInt(e.target.value))} />
@@ -381,6 +392,38 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                       {statuses.map((status) => (
                         <SelectItem key={status.value} value={status.value}>
                           {status.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+                name="orderState"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Стан</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Виберіть стан"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {states.map((state) => (
+                        <SelectItem key={state.value} value={state.value}>
+                          {state.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

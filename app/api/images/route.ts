@@ -21,7 +21,7 @@ const readFile = (
       return Date.now().toString() + "_" + path.originalFilename;
     };
   }
-  options.maxFilecollection = 4000 * 1024 * 1024;
+  options.maxFileageGroup = 4000 * 1024 * 1024;
   const form = formidable(options);
   return new Promise((resolve, reject) => {
     form.parse(req, (err, fields, files) => {

@@ -37,7 +37,7 @@ CREATE TABLE `Category` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `collection` (
+CREATE TABLE `ageGroup` (
     `id` VARCHAR(191) NOT NULL,
     `storeId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `collection` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    INDEX `collection_storeId_idx`(`storeId`),
+    INDEX `ageGroup_storeId_idx`(`storeId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -71,14 +71,14 @@ CREATE TABLE `Product` (
     `price` DECIMAL(65, 30) NOT NULL,
     `isFeatured` BOOLEAN NOT NULL DEFAULT false,
     `isArchived` BOOLEAN NOT NULL DEFAULT false,
-    `collectionId` VARCHAR(191) NOT NULL,
+    `ageGroupId` VARCHAR(191) NOT NULL,
     `publishingId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     INDEX `Product_storeId_idx`(`storeId`),
     INDEX `Product_categoryId_idx`(`categoryId`),
-    INDEX `Product_collectionId_idx`(`collectionId`),
+    INDEX `Product_ageGroupId_idx`(`ageGroupId`),
     INDEX `Product_publishingId_idx`(`publishingId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
