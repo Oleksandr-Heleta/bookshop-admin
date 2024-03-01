@@ -41,8 +41,7 @@ import {
 } from "@/components/ui/select";
 import MultipleSelector from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
-import ImageUploadNew from "@/components/image-download";
-import ImageUploader from "@/components/image-uploading";
+import {ImageUploading} from "@/components/image-uploading";
 
 const optionSchema = z.object({
   label: z.string(),
@@ -114,7 +113,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       ? {
           ...initialData,
           price: parseFloat(String(initialData?.price)),
-          ageGroups: initialData.ageGroups.map((coll: AgeGroupToProduct)=>{return {label: coll.ageGroupName, value: coll.ageGroupId}})
+          ageGroups: initialData?.ageGroups ? initialData.ageGroups.map((coll: AgeGroupToProduct)=>{return {label: coll.ageGroupName, value: coll.ageGroupId}}) : []
         }
       : {
           name: "",
@@ -212,7 +211,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               <FormItem>
                 <FormLabel>Зображення</FormLabel>
                 <FormControl>
-                  <ImageUpload
+                  <ImageUploading
                     value={field.value.map((image) => image.url)}
                     disabled={loading}
                     onChange={(url) =>

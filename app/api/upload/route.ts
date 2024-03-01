@@ -1,16 +1,49 @@
-// pages/api/upload.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
-import multer from 'multer';
+import { writeFile } from 'fs/promises'
+import path from 'path'
+import { NextRequest, NextResponse } from 'next/server'
+import fs from 'fs';
 
-const upload = multer({ dest: 'public/assets/images' });
+export async function POST(request: NextRequest) {
+  const data = await request.formData()
+  const file: File | null = data.get('file') as unknown as File
 
-export default async function POST(req: NextApiRequest, res: NextApiResponse) {
-  upload.single('image')(req , res, (err: any) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
+  if (!file) {
+    return NextResponse.json({ success: false })
+  }
 
-    // File is now uploaded to the 'public/assets/images' folder
-    return res.status(200).json({ message: 'File uploaded successfully' });
-  });
+  const bytes = await file.arrayBuffer()
+  const buffer = Buffer.from(bytes)
+
+  const filePath = path.join(process.cwd(), 'public', file.name);
+  await writeFile(filePath, buffer);
+  
+  return NextResponse.json({ success: true, path: filePath})
+
+}
+
+export async function DELETE(request: NextRequest) {
+  const requestBody = await request.json();
+
+  if (!requestBody) {
+    return NextResponse.json({ success: false, message: 'Request body is required' });
+  }
+
+  
+  const { filename } = requestBody;
+
+  if (!filename) {
+    return NextResponse.json({ success: false, message: 'Filename is required' });
+  }
+
+  const filePath = path.join(process.cwd(), 'public', filename.replace(process.env.NEXT_PUBLIC_IMAGE_STORE_URL, ''));
+
+  try {
+    await fs.promises.access(filePath)
+    await fs.promises.unlink(filePath)
+
+    return NextResponse.json({ success: true, message: 'File deleted successfully' })
+  } catch (error) {
+    console.error(`Error deleting file: ${filePath}`, error)
+    return NextResponse.json({ success: false, message: 'Error deleting file' })
+  }
 }

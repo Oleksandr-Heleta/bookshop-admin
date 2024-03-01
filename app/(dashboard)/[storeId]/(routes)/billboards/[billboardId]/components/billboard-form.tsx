@@ -22,7 +22,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modals/alert-modal";
-import ImageUpload from "@/components/ui/image-upload";
+import {ImageUploading} from "@/components/image-uploading";
 
 const formShema = z.object({
   label: z.string().min(1),
@@ -126,7 +126,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                 <FormItem>
                   <FormLabel>Зображення для білборду</FormLabel>
                   <FormControl>
-                    <ImageUpload 
+                    <ImageUploading
                       value={field.value? [field.value] : []}
                       disabled={loading}
                       onChange={(url)=> field.onChange(url)}
