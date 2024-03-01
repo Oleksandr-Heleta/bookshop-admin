@@ -6,7 +6,8 @@ import {
   Image,
   Product,
   AgeGroup,
-  AgeGroupToProduct
+  AgeGroupToProduct,
+  CategoriesToProduct
 } from "@prisma/client";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
@@ -51,10 +52,10 @@ const optionSchema = z.object({
 
 const formShema = z.object({
   name: z.string().min(1),
-  images: z.object({ url: z.string() }).array(),
+  images: z.object({ url: z.string().url() }).array(),
   price: z.coerce.number().positive().min(1),
   quantity: z.coerce.number().positive().min(1),
-  categoryId: z.string().min(1),
+  categories: z.array(optionSchema).min(1),
   publishingId: z.string().min(1),
   ageGroups:z.array(optionSchema).min(1),
   description: z.string().min(1),
@@ -67,19 +68,18 @@ const formShema = z.object({
   sheets: z.coerce.number().positive().min(1),
   size: z.string().min(1),
   titleSheet: z.string().min(1),
-  video: z.string().min(1),
+  video: z.string().url(),
 });
 
 interface ProductFormProps {
-  initialData: Product & ({
-            images: Image[];
-            colections: AgeGroupToProduct[]
-          }) | ({
-                  price: number;
-                }
-            ) | null;
+  initialData: Product & {
+    images: Image[];
+    ageGroups: AgeGroupToProduct[];
+    categories: CategoriesToProduct[];
+  } | {
+    price: number;
+  } | null;
         
-       
   categories: Category[];
   ageGroups: AgeGroup[];
   publishings: Publishing[];
@@ -113,7 +113,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       ? {
           ...initialData,
           price: parseFloat(String(initialData?.price)),
-          ageGroups: initialData?.ageGroups ? initialData.ageGroups.map((coll: AgeGroupToProduct)=>{return {label: coll.ageGroupName, value: coll.ageGroupId}}) : []
+          ageGroups: initialData?.ageGroups ? initialData.ageGroups.map((coll: AgeGroupToProduct)=>{return {label: coll.ageGroupName, value: coll.ageGroupId}}) : [],
+          categories: initialData?.categories ? initialData.categories.map((coll: CategoriesToProduct)=>{return {label: coll.categoryName, value: coll.categoryId}}) : []
         }
       : {
           name: "",
@@ -125,7 +126,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           isSale: false,
           sale: 0,
           isLowQuantity: false,
-          categoryId: "",
+          categories: [],
           publishingId: "",
           ageGroups: [],
           isFeatured: false,
@@ -197,8 +198,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         )}
       </div>
       <Separator />
-      {/* <ImageUploader/> */}
-      {/* <ImageUploadNew dirs={[]}/> */}
+     
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -284,32 +284,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="categoryId"
+              name="categories"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Категорія</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Виберіть категорію"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultipleSelector
+                  hidePlaceholderWhenSelected
+                  value={field.value}
+                  disabled={loading}
+                  onChange={field.onChange}
+                  defaultOptions={categories.map((category)=>{ return {value: category.id, label: category.name}})}
+                  placeholder="Оберіть категорії"
+                  emptyIndicator={
+                    <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                      no results found.
+                    </p>
+                  }
+                />
                   <FormMessage />
                 </FormItem>
               )}

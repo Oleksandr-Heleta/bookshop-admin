@@ -16,7 +16,7 @@ export async function POST(
       images,
       price,
       quantity,
-      categoryId,
+      categories,
       publishingId,
       ageGroups,
       isNew,
@@ -46,8 +46,8 @@ export async function POST(
     if (!price) {
       return new NextResponse("Price is required", { status: 400 });
     }
-    if (!categoryId) {
-      return new NextResponse("Category Id is required", { status: 400 });
+    if (!categories.length) {
+      return new NextResponse("Categories is required", { status: 400 });
     }
     if (!ageGroups.length) {
       return new NextResponse("ageGroups is required", { status: 400 });
@@ -77,7 +77,6 @@ export async function POST(
         description,
         price,
         quantity,
-        categoryId,
         publishingId,
         isNew,
         isSale,
@@ -100,6 +99,11 @@ export async function POST(
         ageGroups: {
           createMany: {
             data: [ ...ageGroups.map((ageGroup: {value: string; label: string}) => ({ ageGroupId: ageGroup.value , ageGroupName: ageGroup.label}))],
+          }
+        },
+        categories: {
+          createMany: {
+            data: [ ...categories.map((category: {value: string; label: string}) => ({ categoryId: category.value , categoryName: category.label}))],
           }
         },
       },
@@ -130,7 +134,11 @@ export async function GET(
     const products = await prismadb.product.findMany({
       where: {
         storeId: params.storeId,
-        categoryId,
+        categories: {
+          some: {
+            categoryId: categoryId,
+          },
+        },
         publishingId,
         ageGroups: {
           some: {
@@ -142,7 +150,7 @@ export async function GET(
       },
       include: {
         images: true,
-        category: true,
+        // category: true,
         publishing: true, 
         // ageGroups: true,
       },

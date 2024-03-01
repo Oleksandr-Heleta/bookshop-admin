@@ -9,7 +9,7 @@ export type ProductColumn = {
   name: string;
   price: string;
   quantity: number;
-  category: string;
+  categories: string[];
   ageGroups: string[];
   publishing: string;
   isSale: boolean;
@@ -65,6 +65,9 @@ export const columns: ColumnDef<ProductColumn>[] = [
   {
     accessorKey: "category",
     header: "Категорія",
+    cell: ({row})=>{
+      return row.original.categories.map((i,index)=>{return <div key={index}>{i}</div>;})
+    }
   },
   {
     accessorKey: "ageGroup",

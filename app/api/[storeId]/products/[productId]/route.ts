@@ -16,7 +16,7 @@ export async function GET(
       },
       include: {
         images: true,
-        category: true,
+        categories: true,
         publishing: true,
         ageGroups: true,
       },
@@ -43,7 +43,7 @@ export async function PATCH(
       images,
       price,
       quantity,
-      categoryId,
+      categories,
       publishingId,
       ageGroups,
       isNew,
@@ -74,8 +74,8 @@ export async function PATCH(
     if (!quantity) {
       return new NextResponse("Quantity is required", { status: 400 });
     }
-    if (!categoryId) {
-      return new NextResponse("Category Id is required", { status: 400 });
+    if (!categories.length) {
+      return new NextResponse("Categories is required", { status: 400 });
     }
     if (!ageGroups.length) {
       return new NextResponse("ageGroups is required", { status: 400 });
@@ -106,7 +106,6 @@ export async function PATCH(
         description,
         price,
         quantity,
-        categoryId,
         publishingId,
         isNew,
         isSale,
@@ -125,6 +124,9 @@ export async function PATCH(
         ageGroups: {
           deleteMany: {},
         },
+        categories: {
+          deleteMany: {},
+        },
       },
     });
 
@@ -141,6 +143,11 @@ export async function PATCH(
         ageGroups: {
           createMany: {
             data: [ ...ageGroups.map((ageGroup: {value: string; label: string}) => ({ ageGroupId: ageGroup.value , ageGroupName: ageGroup.label}))],
+          }
+        },
+        categories: {
+          createMany: {
+            data: [ ...categories.map((category: {value: string; label: string}) => ({ categoryId: category.value , categoryName: category.label}))],
           }
         },
       },

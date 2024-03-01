@@ -45,7 +45,7 @@ model Category {
   store       Store     @relation("StoreToCategory", fields: [storeId], references: [id])
   billboardId String
   billboard   Billboard @relation(fields: [billboardId], references: [id])
-  products    Product[] @relation("CategoryToProduct")
+  products    CategoriesToProduct[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -83,8 +83,8 @@ model Product {
   id            String                @id @default(uuid())
   storeId       String
   store         Store                 @relation("StoreToProduct", fields: [storeId], references: [id])
-  categoryId    String
-  category      Category              @relation("CategoryToProduct", fields: [categoryId], references: [id])
+ 
+  categories      CategoriesToProduct[]
   name          String
   description   String                @db.Text
   sheets        Int
@@ -99,7 +99,7 @@ model Product {
   isFeatured    Boolean               @default(false)
   isArchived    Boolean               @default(false)
   ageGroups   AgeGroupToProduct[]
-  // ageGroup       ageGroup     @relation(fields: [ageGroupId], references: [id])
+ 
   publishingId  String
   publishing    Publishing            @relation(fields: [publishingId], references: [id])
   images        Image[]
@@ -109,8 +109,7 @@ model Product {
   updatedAt     DateTime              @updatedAt
 
   @@index([storeId])
-  @@index([categoryId])
-  // @@index([ageGroupId]) 
+  
   @@index([publishingId])
 }
 
@@ -135,6 +134,18 @@ model AgeGroupToProduct {
 
   @@index([productId])
   @@index([ageGroupId])
+}
+
+model CategoriesToProduct {
+  id           String     @id @default(uuid()) @map("id")
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id])
+  categoryId String
+  categoryName String   @default("")
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@index([productId])
+  @@index([categoryId])
 }
 
 model Order {

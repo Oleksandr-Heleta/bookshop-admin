@@ -15,7 +15,7 @@ const ProductsPage = async({params}:{
             storeId: params.storeId
         },
         include:{
-            category: true,
+            categories: true,
             ageGroups: true,
             publishing: true,
         },
@@ -34,7 +34,7 @@ const ProductsPage = async({params}:{
         isArchived: item.isArchived,
         isLowQuantity: item.isLowQuantity,
         price: formatter.format(item.price.toNumber()),
-        category: item.category.name,
+        categories: item.categories.map((category)=>category.categoryName),
         ageGroups: item.ageGroups.map((ageGroup)=>ageGroup.ageGroupName),
         publishing: item.publishing.name,
         createdAt: format(item.createdAt, "do MMMM  yyyy"),
