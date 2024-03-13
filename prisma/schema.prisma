@@ -17,7 +17,7 @@ model Store {
   userId      String
   billboards  Billboard[]  @relation("StoreToBillboard")
   cetegories  Category[]   @relation("StoreToCategory")
-  ageGroups AgeGroup[] @relation("StoreToageGroup")
+  ageGroups   AgeGroup[]   @relation("StoreToageGroup")
   publishings Publishing[] @relation("StoreTopublishing")
   products    Product[]    @relation("StoreToProduct")
   orders      Order[]      @relation("StoreToOrder")
@@ -39,29 +39,29 @@ model Billboard {
 }
 
 model Category {
-  id          String    @id @default(uuid())
+  id          String                @id @default(uuid())
   name        String
   storeId     String
-  store       Store     @relation("StoreToCategory", fields: [storeId], references: [id])
+  store       Store                 @relation("StoreToCategory", fields: [storeId], references: [id])
   billboardId String
-  billboard   Billboard @relation(fields: [billboardId], references: [id])
+  billboard   Billboard             @relation(fields: [billboardId], references: [id])
   products    CategoriesToProduct[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
 
   @@index([storeId])
   @@index([billboardId])
 }
 
 model AgeGroup {
-  id        String                @id @default(uuid())
+  id        String              @id @default(uuid())
   storeId   String
-  store     Store                 @relation("StoreToageGroup", fields: [storeId], references: [id])
+  store     Store               @relation("StoreToageGroup", fields: [storeId], references: [id])
   name      String
   value     String
   products  AgeGroupToProduct[]
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 
   @@index([storeId])
 }
@@ -80,11 +80,11 @@ model Publishing {
 }
 
 model Product {
-  id            String                @id @default(uuid())
-  storeId       String
-  store         Store                 @relation("StoreToProduct", fields: [storeId], references: [id])
- 
-  categories      CategoriesToProduct[]
+  id      String @id @default(uuid())
+  storeId String
+  store   Store  @relation("StoreToProduct", fields: [storeId], references: [id])
+
+  categories    CategoriesToProduct[]
   name          String
   description   String                @db.Text
   sheets        Int
@@ -98,18 +98,17 @@ model Product {
   isLowQuantity Boolean               @default(false)
   isFeatured    Boolean               @default(false)
   isArchived    Boolean               @default(false)
-  ageGroups   AgeGroupToProduct[]
- 
-  publishingId  String
-  publishing    Publishing            @relation(fields: [publishingId], references: [id])
-  images        Image[]
-  video         String               @default("")
-  orderItems    OrderItem[]
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
+  ageGroups     AgeGroupToProduct[]
+
+  publishingId String
+  publishing   Publishing  @relation(fields: [publishingId], references: [id])
+  images       Image[]
+  video        String      @default("")
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@index([storeId])
-  
   @@index([publishingId])
 }
 
@@ -125,24 +124,24 @@ model Image {
 }
 
 model AgeGroupToProduct {
-  id           String     @id @default(uuid()) @map("id")
+  id           String   @id @default(uuid()) @map("id")
   productId    String
-  product      Product    @relation(fields: [productId], references: [id])
-  ageGroupId String
+  product      Product  @relation(fields: [productId], references: [id])
+  ageGroupId   String
   ageGroupName String   @default("")
-  ageGroup   AgeGroup @relation(fields: [ageGroupId], references: [id])
+  ageGroup     AgeGroup @relation(fields: [ageGroupId], references: [id])
 
   @@index([productId])
   @@index([ageGroupId])
 }
 
 model CategoriesToProduct {
-  id           String     @id @default(uuid()) @map("id")
+  id           String   @id @default(uuid()) @map("id")
   productId    String
-  product      Product    @relation(fields: [productId], references: [id])
-  categoryId String
+  product      Product  @relation(fields: [productId], references: [id])
+  categoryId   String
   categoryName String   @default("")
-  category   Category @relation(fields: [categoryId], references: [id])
+  category     Category @relation(fields: [categoryId], references: [id])
 
   @@index([productId])
   @@index([categoryId])
@@ -154,9 +153,9 @@ model Order {
   store       Store       @relation("StoreToOrder", fields: [storeId], references: [id])
   orderItems  OrderItem[]
   name        String
-  totalPrice  Decimal @default(0)
-  orderStatus String  @default("")
-  orderState  String  @default("")
+  totalPrice  Decimal     @default(0)
+  orderStatus String      @default("")
+  orderState  String      @default("")
   isPaid      Boolean     @default(false)
   phone       String      @default("")
   address     String      @default("")

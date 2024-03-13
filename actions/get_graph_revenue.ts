@@ -25,11 +25,8 @@ export const getGraphRevenue = async (storeId: string): Promise<GraphData[]> => 
   // Grouping the orders by month and summing the revenue
   for (const order of paidOrders) {
     const month = order.createdAt.getMonth(); // 0 for Jan, 1 for Feb, ...
-    let revenueForOrder = 0;
+    let revenueForOrder = order.totalPrice.toNumber();
 
-    for (const item of order.orderItems) {
-      revenueForOrder += item.product.price.toNumber();
-    }
 
     // Adding the revenue for this order to the respective month
     monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenueForOrder;
@@ -37,18 +34,18 @@ export const getGraphRevenue = async (storeId: string): Promise<GraphData[]> => 
 
   // Converting the grouped data into the format expected by the graph
   const graphData: GraphData[] = [
-    { name: "Jan", total: 0 },
-    { name: "Feb", total: 0 },
-    { name: "Mar", total: 0 },
-    { name: "Apr", total: 0 },
-    { name: "May", total: 0 },
-    { name: "Jun", total: 0 },
-    { name: "Jul", total: 0 },
-    { name: "Aug", total: 0 },
-    { name: "Sep", total: 0 },
-    { name: "Oct", total: 0 },
-    { name: "Nov", total: 0 },
-    { name: "Dec", total: 0 },
+    { name: "Січень", total: 0 },
+    { name: "Лютий", total: 0 },
+    { name: "Березень", total: 0 },
+    { name: "Квітень", total: 0 },
+    { name: "Травень", total: 0 },
+    { name: "Червень", total: 0 },
+    { name: "Липень", total: 0 },
+    { name: "Серпень", total: 0 },
+    { name: "Вересень", total: 0 },
+    { name: "Жовтень", total: 0 },
+    { name: "Листопад", total: 0 },
+    { name: "Грудень", total: 0 },
   ];
 
   // Filling in the revenue data

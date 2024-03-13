@@ -37,7 +37,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const {
+    let {
       name,
       description,
       images,
@@ -96,6 +96,9 @@ export async function PATCH(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
+     if(!quantity) {
+      isArchived = true;
+     }
 
     await prismadb.product.update({
       where: {
