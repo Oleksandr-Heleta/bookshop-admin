@@ -31,7 +31,7 @@ const formattedOrders : OrderColumn[] = orders.map((item) => ({
     name: item.name,
     phone: item.phone,
     address: item.address,
-    products: item.orderItems.map((orderItem) => `${orderItem.product.name} - ${orderItem.quantity}`),
+    products: item.orderItems?.map((orderItem) => orderItem.product ? `${orderItem.product.name} - ${orderItem.quantity}` : 'Товар видалено'),
     totalPrice: formatter.format(Number(item.totalPrice)), 
     orderStatus: item.orderStatus,
     orderState: item.orderState, 

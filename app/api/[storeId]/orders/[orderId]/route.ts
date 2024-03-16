@@ -61,7 +61,7 @@ export async function PATCH(
     }));
 
     // Отримання списку старих товарів
-    const oldProducts = oldOrder.orderItems.map((orderItem) => ({
+    const oldProducts = oldOrder.orderItems.map((orderItem: OrderItem) => ({
       id: orderItem.productId,
       quantity: orderItem.quantity,
     }));
@@ -107,7 +107,7 @@ export async function PATCH(
     await Promise.all(
       deletedProducts.map(async (deletedProduct) => {
         await prismadb.product.update({
-          where: { id: deletedProduct.id },
+          where: { id: deletedProduct.id ?? undefined },
           data: {
             quantity: {
               increment: deletedProduct.quantity,
@@ -186,7 +186,7 @@ export async function DELETE(
 
     const updateProductPromises = order.orderItems.map(async (orderItem) => {
       await prismadb.product.update({
-        where: { id: orderItem.productId },
+        where: { id: orderItem.productId ?? undefined },
         data: {
           quantity: {
             increment: orderItem.quantity,

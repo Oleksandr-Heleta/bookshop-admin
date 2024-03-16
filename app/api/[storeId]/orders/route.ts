@@ -80,7 +80,7 @@ export async function POST(
 
     const updateProductPromises = order.orderItems.map(async (orderItem) => {
       await prismadb.product.update({
-        where: { id: orderItem.productId },
+        where: { id: orderItem.productId ?? undefined },
         data: {
           quantity: {
             decrement: orderItem.quantity,

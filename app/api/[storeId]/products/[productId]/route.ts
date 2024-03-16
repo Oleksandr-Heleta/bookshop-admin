@@ -1,5 +1,6 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
+import { de } from "date-fns/locale";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -186,11 +187,35 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
+    const categories = await prismadb.categoriesToProduct.deleteMany({
+      where: {
+        productId: params.productId,
+      },
+    });
+
+    const ageGroups = await prismadb.ageGroupToProduct.deleteMany({
+      where: {
+        productId: params.productId,
+      },
+    });
+
+    const orderItems = await prismadb.orderItem.updateMany({
+      where: {
+        productId: params.productId,
+      },
+      data:{
+        productId: null,
+      }
+     
+    });
+
     const product = await prismadb.product.deleteMany({
       where: {
         id: params.productId,
       },
     });
+
+   
 
     return NextResponse.json(product);
   } catch (error) {

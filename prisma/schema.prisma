@@ -17,8 +17,8 @@ model Store {
   userId      String
   billboards  Billboard[]  @relation("StoreToBillboard")
   cetegories  Category[]   @relation("StoreToCategory")
-  ageGroups   AgeGroup[]   @relation("StoreToageGroup")
-  publishings Publishing[] @relation("StoreTopublishing")
+  ageGroups   AgeGroup[]   @relation("StoreToAgeGroup")
+  publishings Publishing[] @relation("StoreToPublishing")
   products    Product[]    @relation("StoreToProduct")
   orders      Order[]      @relation("StoreToOrder")
   createdAt   DateTime     @default(now())
@@ -56,7 +56,7 @@ model Category {
 model AgeGroup {
   id        String              @id @default(uuid())
   storeId   String
-  store     Store               @relation("StoreToageGroup", fields: [storeId], references: [id])
+  store     Store               @relation("StoreToAgeGroup", fields: [storeId], references: [id])
   name      String
   value     String
   products  AgeGroupToProduct[]
@@ -69,7 +69,7 @@ model AgeGroup {
 model Publishing {
   id        String    @id @default(uuid())
   storeId   String
-  store     Store     @relation("StoreTopublishing", fields: [storeId], references: [id])
+  store     Store     @relation("StoreToPublishing", fields: [storeId], references: [id])
   name      String
   value     String
   products  Product[]
@@ -169,8 +169,8 @@ model OrderItem {
   id        String  @id @default(uuid())
   orderId   String
   order     Order   @relation(fields: [orderId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
   quantity  Int
 
   @@index([orderId])

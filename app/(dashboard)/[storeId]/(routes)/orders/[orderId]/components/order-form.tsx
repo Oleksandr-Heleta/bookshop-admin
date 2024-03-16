@@ -1,6 +1,6 @@
 "use client";
 
-import { Order, OrderItem, Image, Product } from "@prisma/client";
+import { Order, Image, Product } from "@prisma/client";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Trash, CheckIcon, ChevronDown, Plus } from "lucide-react";
@@ -68,9 +68,15 @@ const orderSchema = z.object({
   isPaid: z.boolean().default(false),
 });
 
+type OrderItem = {
+  productId: string | null;
+  quantity: number;
+};
+
+
+
 interface OrderFormProps {
-  initialData:
-    | (Order & {
+  initialData: (Order & {
         orderItems: OrderItem[];
       })
     | null;
@@ -106,8 +112,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     defaultValues: initialData
       ? {
           ...initialData,
-          orderItems: initialData.orderItems?.map((orderItem)=> {return {productId: orderItem.productId,
-            quantity: parseInt(String(orderItem.quantity))}}),
+          orderItems: initialData.orderItems?.map((orderItem) => ({
+            productId: orderItem.productId ?? "",
+            quantity: parseInt(String(orderItem.quantity)),
+          })),
         }
       : {
           orderItems: [{ productId: "", quantity: 1 }],
