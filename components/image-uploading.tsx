@@ -28,7 +28,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
     setIsMounted(true);
   }, []);
 
-  const onUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onUpload = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
   
     if (!file) return;
@@ -111,7 +111,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
           type="button"
           disabled={disabled}
           variant="secondary"
-          onClick={(e: React.FormEvent<HTMLFormElement>) => onUpload(e)}
+          onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => onUpload(e)}
         >
           <ImagePlus className="h-4 w-4 mr-2" />
           Завантажити зображення

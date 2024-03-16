@@ -38,6 +38,8 @@ const ProductPage = async ({
     },
   });
 
+ 
+
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -45,7 +47,7 @@ const ProductPage = async ({
           categories={categories}
           ageGroups={ageGroups}
           publishings={publishings}
-          initialData={product ? {...product, price: parseFloat(String(product?.price)),} : null}
+          initialData={product ? {...product, price: parseFloat(String(product?.price))} : null}
         />
       </div>
     </div>

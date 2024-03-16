@@ -7,7 +7,7 @@ import {
   Product,
   AgeGroup,
   AgeGroupToProduct,
-  CategoriesToProduct
+  CategoriesToProduct,
 } from "@prisma/client";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,8 @@ import {
 } from "@/components/ui/select";
 import MultipleSelector from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {ImageUploading} from "@/components/image-uploading";
+import { ImageUploading } from "@/components/image-uploading";
+import { Decimal } from "@prisma/client/runtime/library";
 
 const optionSchema = z.object({
   label: z.string(),
@@ -57,7 +58,7 @@ const formShema = z.object({
   quantity: z.coerce.number().positive().min(1),
   categories: z.array(optionSchema).min(1),
   publishingId: z.string().min(1),
-  ageGroups:z.array(optionSchema).min(1),
+  ageGroups: z.array(optionSchema).min(1),
   description: z.string().min(1),
   isNew: z.boolean().default(false).optional(),
   isSale: z.boolean().default(false).optional(),
@@ -68,24 +69,38 @@ const formShema = z.object({
   sheets: z.coerce.number().positive().min(1),
   size: z.string().min(1),
   titleSheet: z.string().min(1),
-  video: z.string().url(),
+  video: z.string().min(1),
 });
 
+type ProductFormValues = z.infer<typeof formShema>;
+
+type InitialDataType = {
+  id: string;
+  storeId: string;
+  name: string;
+  description: string;
+  sheets: number;
+  size: string;
+  titleSheet: string;
+  quantity: number;
+  video: string;
+  publishingId: string;
+  isFeatured: boolean;
+  isArchived: boolean;
+  isNew: boolean;
+  isSale: boolean;
+  images: Image[];
+  ageGroups: AgeGroupToProduct[];
+  categories: CategoriesToProduct[];
+  price: number;
+} | null;
+
 interface ProductFormProps {
-  initialData: Product & {
-    images: Image[];
-    ageGroups: AgeGroupToProduct[];
-    categories: CategoriesToProduct[];
-  } | {
-    price: number;
-  } | null;
-        
+  initialData: InitialDataType;
   categories: Category[];
   ageGroups: AgeGroup[];
   publishings: Publishing[];
 }
-
-type ProductFormValues = z.infer<typeof formShema>;
 
 export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
@@ -93,7 +108,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   ageGroups,
   publishings,
 }) => {
- 
   const params = useParams();
   const router = useRouter();
 
@@ -101,9 +115,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [loading, setLoading] = useState(false);
 
   const title = initialData ? "Редагування товару" : "Створення товару";
-  const description = initialData
-    ? "Редагувани товар"
-    : "Додати новий товар";
+  const description = initialData ? "Редагувани товар" : "Додати новий товар";
   const toastMessage = initialData ? "Продукт оновлено." : "Продукт створено.";
   const action = initialData ? "Зберегти зміни" : "Створити";
 
@@ -113,8 +125,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       ? {
           ...initialData,
           price: parseFloat(String(initialData?.price)),
-          ageGroups: initialData?.ageGroups ? initialData.ageGroups.map((coll: AgeGroupToProduct)=>{return {label: coll.ageGroupName, value: coll.ageGroupId}}) : [],
-          categories: initialData?.categories ? initialData.categories.map((coll: CategoriesToProduct)=>{return {label: coll.categoryName, value: coll.categoryId}}) : []
+          ageGroups: initialData?.ageGroups
+            ? initialData.ageGroups.map((coll: AgeGroupToProduct) => {
+                return { label: coll.ageGroupName, value: coll.ageGroupId };
+              })
+            : [],
+          categories: initialData?.categories
+            ? initialData.categories.map((coll: CategoriesToProduct) => {
+                return { label: coll.categoryName, value: coll.categoryId };
+              })
+            : [],
         }
       : {
           name: "",
@@ -138,7 +158,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         },
   });
 
-  
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
@@ -175,7 +194,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
-  
   return (
     <>
       <AlertModal
@@ -198,7 +216,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         )}
       </div>
       <Separator />
-     
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -289,18 +307,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem>
                   <FormLabel>Категорія</FormLabel>
                   <MultipleSelector
-                  hidePlaceholderWhenSelected
-                  value={field.value}
-                  disabled={loading}
-                  onChange={field.onChange}
-                  defaultOptions={categories.map((category)=>{ return {value: category.id, label: category.name}})}
-                  placeholder="Оберіть категорії"
-                  emptyIndicator={
-                    <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                      no results found.
-                    </p>
-                  }
-                />
+                    hidePlaceholderWhenSelected
+                    value={field.value}
+                    disabled={loading}
+                    onChange={field.onChange}
+                    defaultOptions={categories.map((category) => {
+                      return { value: category.id, label: category.name };
+                    })}
+                    placeholder="Оберіть категорії"
+                    emptyIndicator={
+                      <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                        no results found.
+                      </p>
+                    }
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -312,19 +332,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem>
                   <FormLabel>Вік</FormLabel>
                   <MultipleSelector
-                  hidePlaceholderWhenSelected
-                  value={field.value}
-                  disabled={loading}
-                  onChange={field.onChange}
-                  defaultOptions={ageGroups.map((ageGroup)=>{ return {value: ageGroup.id, label: ageGroup.name}})}
-                  placeholder="Оберіть вікові групи"
-                  emptyIndicator={
-                    <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                      no results found.
-                    </p>
-                  }
-                />
-               
+                    hidePlaceholderWhenSelected
+                    value={field.value}
+                    disabled={loading}
+                    onChange={field.onChange}
+                    defaultOptions={ageGroups.map((ageGroup) => {
+                      return { value: ageGroup.id, label: ageGroup.name };
+                    })}
+                    placeholder="Оберіть вікові групи"
+                    emptyIndicator={
+                      <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                        no results found.
+                      </p>
+                    }
+                  />
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -575,7 +597,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
-             <FormField
+            <FormField
               control={form.control}
               name="video"
               render={({ field }) => (

@@ -7,7 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { publishingsColumn} from "./columns";
+import {PublishingsColumn} from "./columns";
 import { Button } from "@/components/ui/button";
 import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -17,7 +17,7 @@ import { useState } from "react";
 import { AlertModal } from "@/components/modals/alert-modal";
 
 interface CellActionProps {
-  data: publishingsColumn;
+  data: PublishingsColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
