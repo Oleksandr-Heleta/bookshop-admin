@@ -150,9 +150,9 @@ export async function GET(
       },
       include: {
         images: true,
-        // category: true,
+        categories: true,
         publishing: true, 
-        // ageGroups: true,
+        ageGroups: true,
       },
       orderBy: {
         createdAt: 'desc'
