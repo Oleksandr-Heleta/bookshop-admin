@@ -42,7 +42,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
         body: data,
       });
      
-      setImages([...images, `/${file.name}`]);
+      setImages([...images, `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`]);
       const responseData = await res.json(); 
       onChange( `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`);
       if (!res.ok) throw new Error(await res.text());
@@ -54,6 +54,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
 
   const onDelete = async (url: string) => {
     try {
+      setLoading(true);
       const res = await fetch("/api/upload", {
         method: "DELETE",
         headers: {
@@ -68,6 +69,8 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
     } catch (e: any) {
       // Handle errors here
       console.error(e);
+    }finally {
+      setLoading(false);
     }
   }
 
@@ -86,6 +89,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
           >
             <div className="z-10 absolute top-2 right-2">
               <Button
+                disabled={loading}
                 type="button"
                 onClick={() => onDelete(url)}
                 variant="destructive"

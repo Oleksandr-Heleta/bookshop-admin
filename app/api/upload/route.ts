@@ -2,6 +2,7 @@ import { writeFile } from 'fs/promises'
 import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs';
+import sharp from 'sharp';
 
 export async function POST(request: NextRequest) {
   const data = await request.formData()
@@ -12,9 +13,9 @@ export async function POST(request: NextRequest) {
   }
 
   const bytes = await file.arrayBuffer()
-  const buffer = Buffer.from(bytes)
+  const buffer = await sharp(bytes).toBuffer()
 
-  const filePath = path.join(process.cwd(), 'public', file.name);
+  const filePath = path.join(process.cwd(), 'images', file.name);
   await writeFile(filePath, buffer);
   
   return NextResponse.json({ success: true, path: filePath})
@@ -35,7 +36,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, message: 'Filename is required' });
   }
 
-  const filePath = path.join(process.cwd(), 'public', filename.replace(process.env.NEXT_PUBLIC_IMAGE_STORE_URL, ''));
+  const filePath = path.join(process.cwd(), 'images', filename.replace(process.env.NEXT_PUBLIC_IMAGE_STORE_URL, ''));
 
   try {
     await fs.promises.access(filePath)
