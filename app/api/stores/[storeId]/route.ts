@@ -10,19 +10,37 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const {name} = body;
+    const {name, sale, mainbillboards} = body;
 
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
     if (!name) return new NextResponse("Name is required", { status: 400 });
     if(!params.storeId) return new NextResponse("Store ID is required", { status: 400 });
 
-    const store = await prismadb.store.updateMany({
+    const mainbillboardIds = mainbillboards.map((item: {value: string; lable: string}) => item.value);
+    const billboards = await prismadb.billboard.findMany({
+      where: {
+        AND: [
+          { storeId: params.storeId },
+          { id: { in: mainbillboardIds} }
+        ]
+      }
+    });
+
+    const store = await prismadb.store.update({
         where: {
             id: params.storeId,
             userId
         },
         data: {
-            name
+            name,
+            sale, 
+            mainbillboards: {
+              deleteMany: {},
+              createMany: {
+               data: [...billboards.map((billboard) => ({ id: billboard.id, imageUrl: billboard.imageUrl, label: billboard.label}))], 
+              }
+            },
+           
         }
     })
 

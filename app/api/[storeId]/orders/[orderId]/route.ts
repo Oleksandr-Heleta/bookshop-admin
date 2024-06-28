@@ -39,6 +39,9 @@ export async function PATCH(
       orderItems,
       orderStatus,
       orderState,
+      call,
+      post,
+      delivery,
       isPaid,
       totalPrice,
     } = body;
@@ -117,8 +120,11 @@ export async function PATCH(
       })
     );
 
-
-    if (isPaid|| orderState === "paided" || (orderState === "afterrecive" && orderStatus === "sended")) {
+    if (
+      isPaid ||
+      orderState === "paided" ||
+      (orderState === "afterrecive" && orderStatus === "sended")
+    ) {
       isPaid = true;
     }
     // Оновлення замовлення
@@ -133,6 +139,9 @@ export async function PATCH(
         orderStatus,
         orderState,
         isPaid,
+        call,
+        post,
+        delivery,
         totalPrice,
         orderItems: {
           // Видалення старих orderItems та додавання кількості в товари

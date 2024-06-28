@@ -23,13 +23,27 @@ const SettingsPage: React.FC<SettingsPageProps> = async ({ params }) => {
     },
   });
 
+  const billboards = await prismadb.billboard.findMany({
+    where: {
+      storeId: params.storeId,
+    },
+  });
+
+  const mainbillboards = await prismadb.mainBillboard.findMany({
+    where: {
+        storeId: params.storeId,
+    }
+});
+
+  
+
   if(!store){
     redirect('/');
   }
 
   return(<div className="flex-col">
     <div className="flex-1 space-y-4 p-8 pt-6">
-        <SettingsForm initialData={store} />
+        <SettingsForm initialData={store} billboards={billboards} mainbillboards={mainbillboards} />
         </div>
     </div>);
 };

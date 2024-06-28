@@ -69,7 +69,7 @@ const formShema = z.object({
   sheets: z.coerce.number().positive().min(1),
   size: z.string().min(1),
   titleSheet: z.string().min(1),
-  video: z.string().min(1),
+  video: z.string().min(1).optional(),
 });
 
 type ProductFormValues = z.infer<typeof formShema>;
@@ -232,8 +232,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <ImageUploading
                     value={field.value.map((image) => image.url)}
                     disabled={loading}
-                    onChange={(url) =>
-                      field.onChange([...field.value, { url }])
+                    onChange={(url) => {
+                      field.onChange([...field.value, { url }]);
+                      initialData && onSubmit({ ...form.getValues(), images: [...field.value, { url }] });
+                    }
                     }
                     onRemove={(url) =>
                       field.onChange([

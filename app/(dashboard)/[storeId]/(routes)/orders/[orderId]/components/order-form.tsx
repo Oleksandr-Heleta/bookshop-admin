@@ -45,9 +45,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
+import { cn, deliveries, posts } from "@/lib/utils";
 import { Decimal } from "@prisma/client/runtime/library";
 import { statuses, states } from "@/lib/utils";
+import { ca } from "date-fns/locale";
 
 const phoneRegex = /^\+380\d{9}$/;
 
@@ -66,6 +67,9 @@ const orderSchema = z.object({
   address: z.string().min(1),
   orderItems: z.array(orderItemSchema),
   isPaid: z.boolean().default(false),
+  call: z.boolean().default(false),
+  post: z.string().min(1),
+  delivery: z.string().min(1),
 });
 
 type OrderItem = {
@@ -413,7 +417,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 name="orderState"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Стан</FormLabel>
+                  <FormLabel>Оплата</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
@@ -424,7 +428,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                       <SelectTrigger>
                         <SelectValue
                           defaultValue={field.value}
-                          placeholder="Виберіть стан"
+                          placeholder="Виберіть метод оплати"
                         />
                       </SelectTrigger>
                     </FormControl>
@@ -440,6 +444,108 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 </FormItem>
               )}
             />
+             <FormField
+              control={form.control}
+                name="post"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Пошта</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Виберіть пошту"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {posts.map((post) => (
+                        <SelectItem key={post.value} value={post.value}>
+                          {post.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+                name="delivery"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Доставка</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Виберіть спосіб доставки"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {deliveries.map((delivery) => (
+                        <SelectItem key={delivery.value} value={delivery.value}>
+                          {delivery.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex flex-col items-start  space-y-0 rounded-md border ">
+              <FormField
+                control={form.control}
+                name="isPaid"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0  p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Оплачено</FormLabel>
+                      
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="call"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Зателефонувати</FormLabel>
+                      
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Store } from "@prisma/client";
+import { Billboard, MainBillboard, Store } from "@prisma/client";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
@@ -24,18 +24,29 @@ import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modals/alert-modal";
 import { ApiAlert } from "@/components/ui/api-alert";
 import { useOrigin } from "@/hooks/use-origin";
+import  MultipleSelector  from "@/components/ui/multi-select";
 
 interface SettingsFormProps {
   initialData: Store;
+  billboards: Billboard[];
+  mainbillboards: MainBillboard[];
 }
+
+const optionSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+  disable: z.boolean().optional(),
+});
 
 const formShema = z.object({
   name: z.string().min(1),
+  mainbillboards:  z.array(optionSchema).min(1),
+  sale: z.number().min(0).max(100),
 });
 
 type SettingsFormValues = z.infer<typeof formShema>;
 
-export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
+export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData, billboards, mainbillboards }) => {
   const params = useParams();
   const router = useRouter();
   const origin = useOrigin();
@@ -45,12 +56,18 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formShema),
-    defaultValues: initialData,
+    defaultValues: {
+      ...initialData,
+      mainbillboards: mainbillboards,
+    },
   });
+
+
 
   const onSubmit = async (data: SettingsFormValues) => {
     try {
       setLoading(true);
+      console.log(data);
       await axios.patch(`/api/stores/${params.storeId}`, data);
       router.refresh();
       toast.success("Магазин успішно оновлено!");
@@ -119,6 +136,54 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
                 </FormItem>
               )}
             />
+             <FormField
+              control={form.control}
+              name="mainbillboards"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Головні Білборди</FormLabel>
+                  <MultipleSelector
+                    hidePlaceholderWhenSelected
+                    value={field.value}
+                    disabled={loading}
+                    onChange={field.onChange}
+                    defaultOptions={billboards.map((billboard) => {
+                      return { value: billboard.id, label: billboard.label };
+                    })}
+                    placeholder="Оберіть білборди для головної сторінки"
+                    emptyIndicator={
+                      <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                        no results found.
+                      </p>
+                    }
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+                control={form.control}
+                name="sale"
+                render={({ field }) => (
+                  <FormItem className="space-x-3 space-y-0 p-4">
+                    <FormLabel>Відсоток знижки</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        disabled={loading}
+                        placeholder="0"
+                        {...field}
+                        onChange={(e) => {
+                          // Перетворення рядка в число
+                          const value = e.target.value === "" ? "" : Number(e.target.value);
+                          field.onChange(value); // Виклик onChange з перетвореним значенням
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
           </div>
           <Button disabled={loading} className="ml-auto" type="submit">
             Зберегти зміни

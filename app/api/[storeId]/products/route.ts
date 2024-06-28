@@ -39,7 +39,7 @@ export async function POST(
       return new NextResponse("Name is required", { status: 400 });
     }
 
-    if (!images || !images.length){
+    if (!images || !images.length) {
       return new NextResponse("Images are required", { status: 400 });
     }
 
@@ -91,20 +91,32 @@ export async function POST(
         storeId: params.storeId,
         images: {
           createMany: {
-            data: [
-              ...images.map((image: {url: string})=>image)
-            ]
-          }
+            data: [...images.map((image: { url: string }) => image)],
+          },
         },
         ageGroups: {
           createMany: {
-            data: [ ...ageGroups.map((ageGroup: {value: string; label: string}) => ({ ageGroupId: ageGroup.value , ageGroupName: ageGroup.label}))],
-          }
+            data: [
+              ...ageGroups.map(
+                (ageGroup: { value: string; label: string }) => ({
+                  ageGroupId: ageGroup.value,
+                  ageGroupName: ageGroup.label,
+                })
+              ),
+            ],
+          },
         },
         categories: {
           createMany: {
-            data: [ ...categories.map((category: {value: string; label: string}) => ({ categoryId: category.value , categoryName: category.label}))],
-          }
+            data: [
+              ...categories.map(
+                (category: { value: string; label: string }) => ({
+                  categoryId: category.value,
+                  categoryName: category.label,
+                })
+              ),
+            ],
+          },
         },
       },
     });
@@ -121,11 +133,16 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   try {
-    const {searchParams} = new URL (req.url);
-    const categoryId = searchParams.get('categoryId') || undefined;
-    const ageGroupId = searchParams.get('ageGroupId') || undefined;
-    const publishingId = searchParams.get('publishingId') || undefined;
-    const isFeatured = searchParams.get('isFeatured');
+    const { searchParams } = new URL(req.url);
+    const categoryId = searchParams.get("categoryId") || undefined;
+    const ageGroupId = searchParams.get("ageGroupId") || undefined;
+    const publishingId = searchParams.get("publishingId") || undefined;
+    const isFeatured = searchParams.get("isFeatured") || undefined;
+    const name = searchParams.get("name") || undefined;
+    const isSale = searchParams.get("isSale") || undefined;
+    const isNew = searchParams.get("isNew") || undefined;
+    const maxPrice = searchParams.get("maxPrice") || undefined;
+    const minPrice = searchParams.get("minPrice") || undefined;
 
     if (!params.storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
@@ -134,32 +151,52 @@ export async function GET(
     const products = await prismadb.product.findMany({
       where: {
         storeId: params.storeId,
-        categories: {
-          some: {
-            categoryId: categoryId,
-          },
+        // name: name ? {
+        //   contains: name,
+         
+        // } : undefined,
+        categories: categoryId
+          ? {
+              some: {
+                id: categoryId,
+              },
+            }
+          : undefined,
+        ageGroups: ageGroupId
+          ? {
+              some: {
+                id: ageGroupId,
+              },
+            }
+          : undefined,
+        publishingId: publishingId || undefined,
+        isFeatured: isFeatured ? isFeatured === "true" : undefined,
+        isSale: isSale ? isSale === "true" : undefined,
+        isNew: isNew ? isNew === "true" : undefined,
+        price: {
+          ...(minPrice && { gte: parseFloat(minPrice) }),
+          ...(maxPrice && { lte: parseFloat(maxPrice) }),
         },
-        publishingId,
-        ageGroups: {
-          some: {
-            ageGroupId: ageGroupId,
-          },
-        },
-        isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
       include: {
         images: true,
         categories: true,
-        publishing: true, 
+        publishing: true,
         ageGroups: true,
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
 
-    return NextResponse.json(products);
+    const filteredProducts = name
+  ? products.filter(product =>
+      product.name.toLowerCase().includes(name.toLowerCase())
+    )
+  : products;
+
+    return NextResponse.json(filteredProducts);
   } catch (error) {
     console.log("[PRODUCTS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });

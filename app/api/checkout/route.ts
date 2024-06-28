@@ -10,18 +10,18 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    let {
-      name,
-      phone,
-      address,
-      orderItems,
-      orderState,
-      orderStatus,
-      call,
-      post,
-      delivery,
-      isPaid,
-      totalPrice,
+   let {
+    name,
+    phone,
+    address,
+    orderStatus,
+    payment,
+    call,
+    post,
+    delivery,
+    isPaid,
+    totalPrice,
+    orderItems,
     } = body;
 
     if (!userId) {
@@ -59,11 +59,7 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    if (
-      isPaid ||
-      orderState === "paided" ||
-      (orderState === "afterrecive" && orderStatus === "sended")
-    ) {
+    if (isPaid || (payment === "afterrecive" && orderStatus === "sended")) {
       isPaid = true;
     }
     const order = await prismadb.order.create({
@@ -72,11 +68,11 @@ export async function POST(
         phone,
         address,
         orderStatus,
-        orderState,
-        isPaid,
+        orderState: payment,
         call,
         post,
         delivery,
+        isPaid,
         totalPrice,
         storeId: params.storeId,
         orderItems: {
@@ -104,36 +100,6 @@ export async function POST(
     return NextResponse.json(order);
   } catch (error) {
     console.log("[ORDER_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
-  }
-}
-
-export async function GET(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
-  try {
-    const { searchParams } = new URL(req.url);
-
-    if (!params.storeId) {
-      return new NextResponse("Store ID is required", { status: 400 });
-    }
-
-    const orders = await prismadb.order.findMany({
-      where: {
-        storeId: params.storeId,
-      },
-      include: {
-        orderItems: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return NextResponse.json(orders);
-  } catch (error) {
-    console.log("[ORDERS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

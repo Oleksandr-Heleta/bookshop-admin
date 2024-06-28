@@ -19,6 +19,18 @@ export const statuses = [
 
 export const states =  [
   { name: "Накладений платіж", value: "afterrecive" },
-  { name: "Оплачено", value: "paided" },
-  { name: "Не оплачено", value: "nonpaid" },
+  { name: "За реквізитами", value: "byIBAN" },
+  { name: "Онлайн", value: "online" },
+];
+
+export const posts =  [
+  { name: "Укр пошта", value: "ukr-post" },
+  { name: "Нова пошта", value: "new-post" },
+  
+];
+
+export const deliveries =  [
+  { name: "До відділення", value: "post" },
+  { name: "За адресою", value: "courier" },
+  
 ];

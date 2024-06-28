@@ -12,17 +12,20 @@ generator client {
 }
 
 model Store {
-  id          String       @id @default(uuid())
-  name        String
-  userId      String
-  billboards  Billboard[]  @relation("StoreToBillboard")
-  cetegories  Category[]   @relation("StoreToCategory")
-  ageGroups   AgeGroup[]   @relation("StoreToAgeGroup")
-  publishings Publishing[] @relation("StoreToPublishing")
-  products    Product[]    @relation("StoreToProduct")
-  orders      Order[]      @relation("StoreToOrder")
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id             String          @id @default(uuid())
+  name           String
+  userId         String
+  billboards     Billboard[]     @relation("StoreToBillboard")
+  cetegories     Category[]      @relation("StoreToCategory")
+  ageGroups      AgeGroup[]      @relation("StoreToAgeGroup")
+  publishings    Publishing[]    @relation("StoreToPublishing")
+  products       Product[]       @relation("StoreToProduct")
+  orders         Order[]         @relation("StoreToOrder")
+  // infos       Info[]       @relation("StoreToInfo")
+  sale           Int             @default(0)
+  mainbillboards MainBillboard[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Billboard {
@@ -37,6 +40,31 @@ model Billboard {
 
   @@index([storeId])
 }
+
+model MainBillboard {
+  id        String   @id @default(uuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+  label     String
+  imageUrl  String
+  //  store BillboardToStore[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+}
+
+// model BillboardToStore {
+//   id           String   @id @default(uuid()) @map("id")
+//   billboardId    String
+//   billboard     MainBillboard  @relation(fields: [billboardId], references: [id])
+//   storeId   String
+//   billboardLable String   @default("")
+//   store    Store @relation(fields: [storeId], references: [id])
+
+//   @@index([billboardId])
+//   @@index([storeId])
+// }
 
 model Category {
   id          String                @id @default(uuid())
@@ -159,6 +187,9 @@ model Order {
   isPaid      Boolean     @default(false)
   phone       String      @default("")
   address     String      @default("")
+  call        Boolean     @default(false)
+  post        String      @default("new-post")
+  delivery    String      @default("post")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -166,9 +197,9 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id])
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
   quantity  Int
@@ -176,3 +207,16 @@ model OrderItem {
   @@index([orderId])
   @@index([productId])
 }
+
+// model Info {
+//   id        String   @id @default(uuid())
+//   storeId   String
+//   store       Store       @relation("StoreToInfo", fields: [storeId], references: [id])
+//   name     String
+//   billboards   String
+//   sale     Int
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([storeId])
+// }
