@@ -8,27 +8,31 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
     try {
-      const { userId } = auth();
-      const body = await req.json();
+          
   
-     
-  
-      if (!userId) {
-        return new NextResponse("Unautorized", { status: 401 });
+      if (!params.storeId) { 
+        return new NextResponse("Store ID is required", { status: 400 });
       }
   
-        const store = await prismadb.store.findUnique({
-            where:{
-                userId,
-                id: params.storeId,
-            }
-        });
+      const store = await prismadb.store.findUnique({
+        where: {
+          id: params.storeId,
+        },
+        select: {
+          id: true,
+          name: true,
+          sale: true,
+        },
+      });
+
+        // console.log(store);
 
         const mainbillboards = await prismadb.mainBillboard.findMany({
             where: {
                 storeId: params.storeId,
             }
         });
+        // console.log(mainbillboards);
   
        const data = {
         id: store?.id,
@@ -36,10 +40,12 @@ export async function GET(
         sale: store?.sale,
         mainbillboards: mainbillboards
        }
+
+      //  console.log(data);
   
       return NextResponse.json(data);
     } catch (error) {
-      console.log("[STORE_POST]", error);
+      console.log("[STORE_INFO_GET]", error);
       return new NextResponse("Internal error", { status: 500 });
     }
   }

@@ -2,6 +2,18 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": `http://localhost:3001`,
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS () {
+  return NextResponse.json({}, { headers: corsHeaders });
+};
+
+
+
 export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
@@ -134,6 +146,7 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(req.url);
+    console.log(searchParams);
     const categoryId = searchParams.get("categoryId") || undefined;
     const ageGroupId = searchParams.get("ageGroupId") || undefined;
     const publishingId = searchParams.get("publishingId") || undefined;
@@ -158,14 +171,14 @@ export async function GET(
         categories: categoryId
           ? {
               some: {
-                id: categoryId,
+                categoryId: categoryId,
               },
             }
           : undefined,
         ageGroups: ageGroupId
           ? {
               some: {
-                id: ageGroupId,
+                ageGroupId: ageGroupId,
               },
             }
           : undefined,
@@ -190,13 +203,17 @@ export async function GET(
       },
     });
 
+    
+
     const filteredProducts = name
   ? products.filter(product =>
       product.name.toLowerCase().includes(name.toLowerCase())
     )
   : products;
 
-    return NextResponse.json(filteredProducts);
+  // console.log(filteredProducts);
+
+    return NextResponse.json( {data: filteredProducts} , { headers: corsHeaders });
   } catch (error) {
     console.log("[PRODUCTS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });

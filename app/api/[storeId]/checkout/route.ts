@@ -1,13 +1,25 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
+import { sendMessage } from "@/lib/telegram-chat";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": `http://localhost:3001`,
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS () {
+  return NextResponse.json({}, { headers: corsHeaders });
+};
+
 
 export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
 ) {
   try {
-    const { userId } = auth();
+    
     const body = await req.json();
 
    let {
@@ -24,10 +36,7 @@ export async function POST(
     orderItems,
     } = body;
 
-    if (!userId) {
-      return new NextResponse("Unauthenticated", { status: 401 });
-    }
-
+    
     if (!phone) {
       return new NextResponse("Phone is required", { status: 400 });
     }
@@ -51,7 +60,7 @@ export async function POST(
     const storeByUserId = await prismadb.store.findFirst({
       where: {
         id: params.storeId,
-        userId,
+       
       },
     });
 
@@ -76,7 +85,14 @@ export async function POST(
         totalPrice,
         storeId: params.storeId,
         orderItems: {
-          create: orderItems,
+          create: orderItems.map((item: { quantity: number, productId: string }) => ({
+            quantity: item.quantity,
+            product: {
+              connect: {
+                id: item.productId
+              }
+            }
+          })),
         },
       },
       include: {
@@ -97,7 +113,15 @@ export async function POST(
 
     await Promise.all(updateProductPromises);
 
-    return NextResponse.json(order);
+    await sendMessage({name, phone , totalPrice, orderItems});
+
+    let linkUrl = `${process.env.FRONTEND_STORE_URL}/cart?success=true`;
+
+    if(payment === "online") {
+linkUrl = `https://api.monobank.ua/`}
+
+
+      return NextResponse.json({url: linkUrl}, { headers: corsHeaders }  ); // 
   } catch (error) {
     console.log("[ORDER_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
