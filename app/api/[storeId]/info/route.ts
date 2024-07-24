@@ -3,6 +3,16 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": `http://localhost:3001`,
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS () {
+  return NextResponse.json({}, { headers: corsHeaders });
+};
+
 export async function GET(
     req: Request,
   { params }: { params: { storeId: string } }
@@ -43,7 +53,7 @@ export async function GET(
 
       //  console.log(data);
   
-      return NextResponse.json(data);
+      return NextResponse.json({data}, { headers: corsHeaders }  );
     } catch (error) {
       console.log("[STORE_INFO_GET]", error);
       return new NextResponse("Internal error", { status: 500 });

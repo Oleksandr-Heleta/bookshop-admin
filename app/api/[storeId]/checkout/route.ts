@@ -36,6 +36,7 @@ export async function POST(
     orderItems,
     } = body;
 
+    // console.log(body);
     
     if (!phone) {
       return new NextResponse("Phone is required", { status: 400 });
@@ -113,7 +114,7 @@ export async function POST(
 
     await Promise.all(updateProductPromises);
 
-    await sendMessage({name, phone , totalPrice, orderItems});
+    await sendMessage({name, phone , totalPrice, orderItems, call, payment});
 
     let linkUrl = `${process.env.FRONTEND_STORE_URL}/cart?success=true`;
 
