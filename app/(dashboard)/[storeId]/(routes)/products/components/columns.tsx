@@ -24,6 +24,14 @@ export const columns: ColumnDef<ProductColumn>[] = [
   {
     accessorKey: "name",
     header: "Назва",
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-start gap-x-2">
+          <div>{row.original.name}</div>
+          
+        </div>
+      );
+    },
   },
   {
     accessorKey: "isSale",
@@ -57,7 +65,8 @@ export const columns: ColumnDef<ProductColumn>[] = [
       return (
         <div className="flex flex-row items-start gap-x-2">
            {row.original.quantity}
-           {row.original.isLowQuantity && <div className="bg-amber-200 rounded-2xl text-white px-2 text-[8px]">ЗАКІНЧУЄТЬСЯ</div>}
+           {row.original.isLowQuantity && !row.original.isArchived  && <div className="bg-amber-200 rounded-2xl text-white px-2 text-[8px]">ЗАКІНЧУЄТЬСЯ</div>}
+           {row.original.isArchived && <div className="bg-red-700 rounded-2xl text-white px-2 text-[8px]">АРХІВОВАНО</div>}
         </div>
       )
     }

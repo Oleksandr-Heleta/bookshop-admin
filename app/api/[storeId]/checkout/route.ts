@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { sendMessage } from "@/lib/telegram-chat";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": `http://localhost:3001`,
+  "Access-Control-Allow-Origin": `${process.env.FRONTEND_STORE_URL}`,
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
@@ -102,7 +102,7 @@ export async function POST(
     });
 
     const updateProductPromises = order.orderItems.map(async (orderItem) => {
-      await prismadb.product.update({
+      const product = await prismadb.product.update({
         where: { id: orderItem.productId ?? undefined },
         data: {
           quantity: {
@@ -110,6 +110,15 @@ export async function POST(
           },
         },
       });
+
+      if (product.quantity <= 0) {
+        await prismadb.product.update({
+          where: { id: orderItem.productId ?? undefined },
+          data: {
+            isArchived: true,
+          },
+        });
+      }
     });
 
     await Promise.all(updateProductPromises);

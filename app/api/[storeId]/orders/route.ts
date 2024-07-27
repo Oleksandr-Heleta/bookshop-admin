@@ -89,7 +89,7 @@ export async function POST(
     });
 
     const updateProductPromises = order.orderItems.map(async (orderItem) => {
-      await prismadb.product.update({
+      const product = await prismadb.product.update({
         where: { id: orderItem.productId ?? undefined },
         data: {
           quantity: {
@@ -97,6 +97,14 @@ export async function POST(
           },
         },
       });
+      if (product.quantity <= 0) {
+        await prismadb.product.update({
+          where: { id: orderItem.productId ?? undefined },
+          data: {
+            isArchived: true,
+          },
+        });
+      }
     });
 
     await Promise.all(updateProductPromises);

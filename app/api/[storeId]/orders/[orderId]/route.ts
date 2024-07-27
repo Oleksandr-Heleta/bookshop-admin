@@ -82,9 +82,10 @@ export async function PATCH(
     await Promise.all(
       newProducts.map(async (newProduct: { id: string; quantity: number }) => {
         const oldProduct = oldProducts.find((p) => p.id === newProduct.id);
+        let product: Product | null;
         if (oldProduct) {
           // Зменшення кількості
-          await prismadb.product.update({
+           product = await prismadb.product.update({
             where: { id: newProduct.id },
             data: {
               quantity: {
@@ -92,14 +93,25 @@ export async function PATCH(
               },
             },
           });
+         
+
         } else {
           // Збільшення кількості, якщо товар відсутній в старому замовленні
-          await prismadb.product.update({
+          product = await prismadb.product.update({
             where: { id: newProduct.id },
             data: {
               quantity: {
                 decrement: newProduct.quantity,
               },
+            },
+          });
+        }
+
+        if (product.quantity <= 0) {
+          await prismadb.product.update({
+            where: { id: newProduct.id },
+            data: {
+              isArchived: true,
             },
           });
         }
