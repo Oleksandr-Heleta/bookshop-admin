@@ -181,12 +181,16 @@ model Order {
   store       Store       @relation("StoreToOrder", fields: [storeId], references: [id])
   orderItems  OrderItem[]
   name        String
+  surname     String     @default("")
   totalPrice  Decimal     @default(0)
   orderStatus String      @default("")
   orderState  String      @default("")
   isPaid      Boolean     @default(false)
   phone       String      @default("")
+  city        String      @default("")
+  cityId      String      @default("")
   address     String      @default("")
+  addressId   String      @default("")
   call        Boolean     @default(false)
   post        String      @default("new-post")
   delivery    String      @default("post")

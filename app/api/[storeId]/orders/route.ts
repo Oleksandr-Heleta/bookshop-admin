@@ -12,7 +12,9 @@ export async function POST(
 
     let {
       name,
+      surname,
       phone,
+      city,
       address,
       orderItems,
       orderState,
@@ -34,6 +36,14 @@ export async function POST(
 
     if (!name) {
       return new NextResponse("Name is required", { status: 400 });
+    }
+
+    if (!surname) {
+      return new NextResponse("Name is required", { status: 400 });
+    }
+
+    if (!city) {
+      return new NextResponse("City is required", { status: 400 });
     }
 
     if (!address) {
@@ -69,7 +79,9 @@ export async function POST(
     const order = await prismadb.order.create({
       data: {
         name,
+        surname,
         phone,
+        city,
         address,
         orderStatus,
         orderState,

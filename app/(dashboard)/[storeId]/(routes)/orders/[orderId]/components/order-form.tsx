@@ -59,11 +59,13 @@ const orderItemSchema = z.object({
 
 const orderSchema = z.object({
   name: z.string().min(1),
+  surname: z.string().min(1),
   orderStatus: z.string().min(1),
   orderState: z.string().min(1), 
   phone: z.string().refine(value => phoneRegex.test(value), {
     message: 'Телефон повинен бути у форматі +380000000000',
   }),
+  city: z.string().min(1),
   address: z.string().min(1),
   orderItems: z.array(orderItemSchema),
   isPaid: z.boolean().default(false),
@@ -124,10 +126,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       : {
           orderItems: [{ productId: "", quantity: 1 }],
           name: "",
+          surname: "",
           orderStatus: "",
           orderState: "",
           isPaid: false,
           phone: "+380",
+          city: "",
           address: "",
         },
   });
@@ -336,7 +340,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Введіть Імя та Прізвище"
+                      placeholder="Введіть Ім'я"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="surname"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>П.І.Б.</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Введіть Прізвище"
                       {...field}
                     />
                   </FormControl>
@@ -362,6 +383,23 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 </FormItem>
               )}
             />
+               <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Адреса</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Введіть місто"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="address"
@@ -371,7 +409,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Введіть адресу"
+                      placeholder="Введіть адресу (відділення)"
                       {...field}
                     />
                   </FormControl>

@@ -29,7 +29,9 @@ const OrdrersPage = async({params}:{
 const formattedOrders : OrderColumn[] = orders.map((item) => ({
     id: item.id,
     name: item.name,
+    surname: item.surname,
     phone: item.phone,
+    city: item.city,
     address: item.address,
     products: item.orderItems?.map((orderItem) => orderItem.product ? `${orderItem.product.name} - ${orderItem.quantity}` : 'Товар видалено'),
     totalPrice: formatter.format(Number(item.totalPrice)), 

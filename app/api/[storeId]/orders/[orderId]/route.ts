@@ -34,7 +34,9 @@ export async function PATCH(
 
     let {
       name,
+      surname,
       phone,
+      city,
       address,
       orderItems,
       orderStatus,
@@ -134,7 +136,7 @@ export async function PATCH(
 
     if (
       isPaid ||
-      orderState === "paided" ||
+      orderState === "byIBAN" ||
       (orderState === "afterrecive" && orderStatus === "sended")
     ) {
       isPaid = true;
@@ -146,7 +148,9 @@ export async function PATCH(
       },
       data: {
         name,
+        surname,
         phone,
+        city,
         address,
         orderStatus,
         orderState,

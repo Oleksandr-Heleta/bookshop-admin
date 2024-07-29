@@ -3,12 +3,15 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { CellAction } from "./cell-action"
 import { statuses, states } from "@/lib/utils";
+import { CheckCircle, Circle  } from 'lucide-react';
 
 
 export type OrderColumn = {
   id: string;
   name: string;
+  surname: string;
   phone: string;
+  city: string
   address: string;
   isPaid: boolean;
   totalPrice: string;
@@ -28,7 +31,10 @@ export const columns: ColumnDef<OrderColumn>[] = [
   },
   {
     accessorKey: "name",
-    header: "П.І.Б.",              
+    header: "П.І.Б.",
+    cell: ({row})=>{
+      return `${row.original.name} ${row.original.surname}`;
+     }              
   },
   {
     accessorKey: "phone",
@@ -36,7 +42,10 @@ export const columns: ColumnDef<OrderColumn>[] = [
   },
   {
     accessorKey: "address",
-    header: "Адреса",              
+    header: "Адреса", 
+    cell: ({row})=>{
+      return `${row.original.city}, ${row.original.address}`;
+     }             
   },
   {
     accessorKey: "totalPrice",
@@ -45,9 +54,12 @@ export const columns: ColumnDef<OrderColumn>[] = [
 
   {
     accessorKey: "orderState",
-    header: "Стан",
+    header: "Оплата",
     cell: ({row})=>{
-      return states.find(state => state.value === row.original.orderState)?.name;
+      return <div className="flex gap-2">
+          {row.original.isPaid ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Circle className="h-4 w-4 text-red-500" />}
+        {states.find(state => state.value === row.original.orderState)?.name}
+        </div>
      }
   },
   {
