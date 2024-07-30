@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Trash, ImagePlus } from "lucide-react";
+import DragDropFiles from "@/components/ui/drag-drop";
+import { set } from "date-fns";
 
 interface ImageUploadProps {
   disabled?: boolean;
@@ -23,6 +25,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>(value);
   const [isMounted, setIsMounted] = useState(false);
+  const [dragDropOpen, setDragDropOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -80,12 +83,13 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
 
   return (
     <div>
+      <DragDropFiles isOpen={dragDropOpen} />
       <div className="flex mb-4 items-center gap-4">
       {images.length > 0 &&
         images.map((url, i) => (
           <div
             key={i}
-            className="relative w-[200px] h-[200px] rounded-md overflow-hiden"
+            className="relative w-[200px] h-[200px] border rounded-md overflow-hiden"
           >
             <div className="z-10 absolute top-2 right-2">
               <Button
@@ -98,7 +102,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
                 <Trash className="h-4 w-4" />
               </Button>
             </div>
-            <Image fill className="object-cover" src={url} alt="Image" />
+            <Image fill className="object-contain" src={url} alt="Image" />
           </div>
         ))}
         </div>
@@ -115,7 +119,8 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
           type="button"
           disabled={disabled}
           variant="secondary"
-          onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => onUpload(e)}
+          // onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => onUpload(e)}
+            onClick={()=>{setDragDropOpen(true)}}
         >
           <ImagePlus className="h-4 w-4 mr-2" />
           Завантажити зображення

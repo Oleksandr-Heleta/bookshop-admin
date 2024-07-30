@@ -41,22 +41,24 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const cityId = searchParams.get("city_id") || undefined;
     const postindex = searchParams.get("postindex") || undefined;
+    // console.log( postindex);
     const postOfficesInCity = await getPostOffices(
       cityId as string,
       postindex as string
     );
-    console.log(postOfficesInCity);
+   
     const postOffices = postOfficesInCity
       .filter((postOffice: any) => {
-        return (postOffice.POSTINDEX.includes(postindex) && ( postOffice.TYPE_SHORT == 'Пересувне відділення' || postOffice.TYPE_SHORT == 'Міське відділення')) ;
+        return ( postOffice.TYPE_SHORT == 'Пересувне відділення' || postOffice.TYPE_SHORT == 'Міське відділення') ;
       })
       .map((postOffice: any) => {
         return {
           id: postOffice.ID,
           name: `${postOffice.POSTINDEX} (${(postOffice.TYPE_SHORT == 'Пересувне відділення')? postOffice.PO_SHORT : postOffice.ADDRESS})`,
         };
-      });
-    
+      })
+      .filter((postOffice: any) => postOffice.name.toLowerCase().includes(postindex));
+      // console.log(postOffices);
     return NextResponse.json({ data: postOffices }, { headers: corsHeaders });
   } catch (error) {
     console.log("[POSTOFICE_GET]", error);

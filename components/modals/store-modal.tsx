@@ -53,8 +53,8 @@ export const StoreModal = () => {
 
     return (
         <Modal
-            title="Create store"
-            description="Add a new store to manage product and categories"
+            title="Створити новий магазин"
+            description="Додайте щоб керувати своїми товарами та замовленнями"
             isOpen={storeModal.isOpen}
             onClose={storeModal.onClose}
         >
