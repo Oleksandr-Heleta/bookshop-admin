@@ -5,21 +5,36 @@ import fs from 'fs';
 import sharp from 'sharp';
 
 export async function POST(request: NextRequest) {
-  const data = await request.formData()
-  const file: File | null = data.get('file') as unknown as File
+  const data = await request.formData();
+  const files: File[] = [];
+  
+  
+  let index = 0;
+  while (true) {
+    const file = data.get(`Files[${index}]`) as File | null;
+    if (!file) break;
+    files.push(file);
+    index++;
+  }
+  
+  console.log("Retrieved files:", files);
 
-  if (!file) {
-    return NextResponse.json({ success: false })
+  if (!files || files.length === 0) {
+    return NextResponse.json({ success: false });
   }
 
-  const bytes = await file.arrayBuffer()
-  const buffer = await sharp(bytes).toBuffer()
+  const filePaths = await Promise.all(files.map(async (file) => {
+    const bytes = await file.arrayBuffer();
+    const buffer = await sharp(bytes).toBuffer();
+    const filePath = path.join(process.cwd(), 'public', file.name); // change public to images folder
+    await writeFile(filePath, buffer);
+    return {
+      filePath,
+      fileName: file.name
+    };
+  }));
 
-  const filePath = path.join(process.cwd(), 'images', file.name);
-  await writeFile(filePath, buffer);
-  
-  return NextResponse.json({ success: true, path: filePath})
-
+  return NextResponse.json({ success: true, paths: filePaths });
 }
 
 export async function DELETE(request: NextRequest) {

@@ -158,7 +158,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         },
   });
 
-  const onSubmit = async (data: ProductFormValues) => {
+  const onSubmit = async (data: ProductFormValues, goOut: boolean = true) => {
+    // console.log(data);
     try {
       setLoading(true);
       if (initialData) {
@@ -170,7 +171,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         await axios.post(`/api/${params.storeId}/products`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/products`);
+      if (goOut){
+        router.push(`/${params.storeId}/products`);
+      }
       toast.success(toastMessage);
     } catch (error) {
       toast.error("Щось пішло не так!");
@@ -219,7 +222,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit((data) => onSubmit(data))}
           className="space-y-8 w-full"
         >
           <FormField
@@ -232,15 +235,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <ImageUploading
                     value={field.value.map((image) => image.url)}
                     disabled={loading}
-                    onChange={(url) => {
-                      field.onChange([...field.value, { url }]);
-                      initialData && onSubmit({ ...form.getValues(), images: [...field.value, { url }] });
-                    }
-                    }
-                    onRemove={(url) =>
+                    multipe
+                    onChange={(urls) => {
+                      const newImages = urls.map((url) => ({ url }));
+                      field.onChange(newImages);
+                      initialData && onSubmit({ ...form.getValues(), images: newImages }, false);
+                    }}
+                    onRemove={(url) => {
+                      const newImages = form.getValues('images').filter((current) => current.url != url);
                       field.onChange([
                         ...field.value.filter((current) => current.url != url),
                       ])
+                      console.log(newImages);
+                      initialData && onSubmit({ ...form.getValues(), images: newImages }, false);
+                    }
                     }
                   />
                 </FormControl>
@@ -617,7 +625,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               )}
             />
           </div>
-          <Button disabled={loading} className="ml-auto" type="submit">
+          <Button disabled={loading} className="ml-auto" type="submit" >
             {action}
           </Button>
         </form>

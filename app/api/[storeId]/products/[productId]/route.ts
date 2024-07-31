@@ -58,34 +58,16 @@ export async function PATCH(
       titleSheet,
       video
     } = body;
-   
 
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
-    }
-
-    if (!images || !images.length) {
-      return new NextResponse("Images are required", { status: 400 });
-    }
-
-    if (!price) {
-      return new NextResponse("Price is required", { status: 400 });
-    }
-    if (!quantity) {
-      return new NextResponse("Quantity is required", { status: 400 });
-    }
-    if (!categories.length) {
-      return new NextResponse("Categories is required", { status: 400 });
-    }
-    if (!ageGroups.length) {
-      return new NextResponse("ageGroups is required", { status: 400 });
-    }
-    if (!publishingId) {
-      return new NextResponse("publishing Id is required", { status: 400 });
-    }
-    if (!params.productId)
-      return new NextResponse("Product ID is required", { status: 400 });
+    if (!name) return new NextResponse("Name is required", { status: 400 });
+    if (!images || !images.length) return new NextResponse("Images are required", { status: 400 });
+    if (!price) return new NextResponse("Price is required", { status: 400 });
+    if (!quantity) return new NextResponse("Quantity is required", { status: 400 });
+    if (!categories.length) return new NextResponse("Categories is required", { status: 400 });
+    if (!ageGroups.length) return new NextResponse("ageGroups is required", { status: 400 });
+    if (!publishingId) return new NextResponse("publishing Id is required", { status: 400 });
+    if (!params.productId) return new NextResponse("Product ID is required", { status: 400 });
 
     const storeByUserId = await prismadb.store.findFirst({
       where: {
@@ -97,11 +79,12 @@ export async function PATCH(
     if (!storeByUserId) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-     if(!quantity) {
-      isArchived = true;
-     }
 
-    await prismadb.product.update({
+    if (!quantity) {
+      isArchived = true;
+    }
+
+    const product = await prismadb.product.update({
       where: {
         id: params.productId,
       },
@@ -124,42 +107,34 @@ export async function PATCH(
         storeId: params.storeId,
         images: {
           deleteMany: {},
-        },
-        ageGroups: {
-          deleteMany: {},
-        },
-        categories: {
-          deleteMany: {},
-        },
-      },
-    });
-
-    const product = await prismadb.product.update({
-      where: {
-        id: params.productId,
-      },
-      data: {
-        images: {
           createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+            data: images.map((image: { url: string }) => ({ url: image.url })),
           },
         },
         ageGroups: {
+          deleteMany: {},
           createMany: {
-            data: [ ...ageGroups.map((ageGroup: {value: string; label: string}) => ({ ageGroupId: ageGroup.value , ageGroupName: ageGroup.label}))],
-          }
+            data: ageGroups.map((ageGroup: { value: string; label: string }) => ({
+              ageGroupId: ageGroup.value,
+              ageGroupName: ageGroup.label,
+            })),
+          },
         },
         categories: {
+          deleteMany: {},
           createMany: {
-            data: [ ...categories.map((category: {value: string; label: string}) => ({ categoryId: category.value , categoryName: category.label}))],
-          }
+            data: categories.map((category: { value: string; label: string }) => ({
+              categoryId: category.value,
+              categoryName: category.label,
+            })),
+          },
         },
       },
     });
 
     return NextResponse.json(product);
   } catch (error) {
-    console.log("[PRODUCT_PACH]", error);
+    console.log("[PRODUCT_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

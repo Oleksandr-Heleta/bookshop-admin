@@ -59,7 +59,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     },
   });
 
-  const onSubmit = async (data: BillboardFormValues) => {
+  const onSubmit = async (data: BillboardFormValues, goOut:boolean = true) => {
     try {
       setLoading(true);
       if(initialData) {
@@ -68,7 +68,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         await axios.post(`/api/${params.storeId}/billboards`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/billboards`);
+      if (goOut) {router.push(`/${params.storeId}/billboards`);}
       toast.success(toastMessage);
     } catch (error) {
       toast.error("Щось пішло не так!");
@@ -116,7 +116,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       <Separator />
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit((data)=>onSubmit(data))}
           className="space-y-8 w-full"
         >
           <FormField
@@ -129,7 +129,11 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                     <ImageUploading
                       value={field.value? [field.value] : []}
                       disabled={loading}
-                      onChange={(url)=> field.onChange(url)}
+                      multipe={false}
+                      onChange={(urls)=> {
+                        field.onChange(urls[0])
+                        initialData && onSubmit({...form.getValues(), imageUrl: urls[0]}, false)
+                      }}
                       onRemove={()=> field.onChange('')}
                     />
                   </FormControl>

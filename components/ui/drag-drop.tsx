@@ -1,14 +1,26 @@
 import { useState, useRef } from "react";
+import toast from "react-hot-toast";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import path from "path"; // Add this line to import the 'path' module
+import { fi } from "date-fns/locale";
 
 interface DragDropFilesProps {
-    isOpen: boolean;
-  }
+  isOpen: boolean;
+  onClose: () => void;
+  onUploadComplete: (urls: string[]) => void;
+  multipe?: boolean;
+}
 
-const DragDropFiles: React.FC<DragDropFilesProps> = ({ isOpen }) => {
+const DragDropFiles: React.FC<DragDropFilesProps> = ({
+  isOpen,
+  onClose,
+  onUploadComplete,
+  multipe,
+}) => {
   const [files, setFiles] = useState<FileList | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -19,23 +31,53 @@ const DragDropFiles: React.FC<DragDropFilesProps> = ({ isOpen }) => {
     setFiles(event.dataTransfer.files);
   };
 
-  const onClose = () => {};
-
-  // send files to the server // 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     const formData = new FormData();
     if (files) {
       Array.from(files).forEach((file, index) => {
         formData.append(`Files[${index}]`, file);
       });
+
+      setLoading(true);
+      try {
+        // for (let [key, value] of formData.entries()) {
+        //   console.log(`${key}:`, value);
+        // }
+
+        // console.log("Uploading files:", files);
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+
+        const responseData = await res.json();
+        // console.log("Response data:", responseData);
+        // const urls = responseData.map((file: { url: string }) => file.url);
+        // console.log("Paths:", responseData.paths);
+        // console.log("Base URL:", process.env.NEXT_PUBLIC_IMAGE_STORE_URL);
+
+        const urls = responseData.paths.map((file: {filePath: string, fileName: string }) => {
+          const fileName = file.fileName;
+          // console.log("File Name:", fileName);
+          return `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${fileName}`;
+        });
+
+        // console.log("URLs:", urls);
+        // onChange( `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`);
+        // console.log("Upload complete:", urls);
+        onUploadComplete(urls);
+        toast.success("Зображення завантажено.");
+        setFiles(null)
+        onClose();
+      } catch (error) {
+        console.error("Upload failed:", error);
+        toast.error("Помилка завантаження.");
+      } finally {
+        setLoading(false);
+      }
     }
-    console.log(formData.getAll("Files"));
-    // fetch(
-    //   "link", {
-    //     method: "POST",
-    //     body: formData
-    //   }
-    // )
   };
 
   if (files)
@@ -46,15 +88,27 @@ const DragDropFiles: React.FC<DragDropFilesProps> = ({ isOpen }) => {
         isOpen={isOpen}
         onClose={onClose}
       >
-        <div className="uploads">
-          <ul>
+        <div className="">
+          <ul className="border rounded-md flex flex-col gap-3 mb-2">
             {Array.from(files).map((file, idx) => (
               <li key={idx}>{file.name}</li>
             ))}
           </ul>
-          <div className="actions">
-            <Button variant="outline" onClick={() => setFiles(null)}>Скасувати</Button>
-            <Button variant="destructive"  onClick={handleUpload}>Завантажити</Button>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              disabled={loading}
+              onClick={() => setFiles(null)}
+            >
+              Скасувати
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={loading}
+              onClick={handleUpload}
+            >
+              Завантажити
+            </Button>
           </div>
         </div>
       </Modal>
@@ -67,12 +121,16 @@ const DragDropFiles: React.FC<DragDropFilesProps> = ({ isOpen }) => {
       isOpen={isOpen}
       onClose={onClose}
     >
-      <div className="border rounded-md flex flex-col items-center justify-center h-44" onDragOver={handleDragOver} onDrop={handleDrop}>
+      <div
+        className="border rounded-md flex flex-col items-center justify-center h-44"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <h3>Перетягніть зображення для завантаження</h3>
         <h3>чи</h3>
         <input
           type="file"
-          multiple
+          multiple={multipe}
           onChange={(event) => setFiles(event.target.files)}
           hidden
           accept="image/*"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -10,9 +11,10 @@ import { set } from "date-fns";
 
 interface ImageUploadProps {
   disabled?: boolean;
-  onChange: (value: string) => void;
+  onChange: (value: string[]) => void;
   onRemove: (value: string) => void;
   value: string[];
+  multipe?: boolean;
 }
 
 export const ImageUploading: React.FC<ImageUploadProps> = ({
@@ -20,6 +22,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
   onChange,
   onRemove,
   value,
+  multipe,
 }) => {
   const [file, setFile] = useState<File>();
   const [loading, setLoading] = useState(false);
@@ -29,31 +32,53 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
 
   useEffect(() => {
     setIsMounted(true);
+    
   }, []);
 
-  const onUpload = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault();
-  
-    if (!file) return;
+  useEffect(() => {
+    // console.log("images updated", images);
+  }, [images]);
 
-    try {
-      const data = new FormData();
-      data.set("file", file);
-     
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: data,
-      });
-     
-      setImages([...images, `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`]);
-      const responseData = await res.json(); 
-      onChange( `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`);
-      if (!res.ok) throw new Error(await res.text());
-    } catch (e: any) {
-      // Handle errors here
-      console.error(e);
+  const handleUploadComplete = async (urls: string[]) => {
+    if(!multipe){
+      
+      for (const img of images) {
+        await onDelete(img);
+      }
+      
+      setImages([...urls]);
+      onChange([...urls]);
+      
+    } else {
+    setImages([...images, ...urls]);
+    onChange([...images, ...urls]);
     }
   };
+
+
+  // const onUpload = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  //   e.preventDefault();
+  
+  //   if (!file) return;
+
+  //   try {
+  //     const data = new FormData();
+  //     data.set("file", file);
+     
+  //     const res = await fetch("/api/upload", {
+  //       method: "POST",
+  //       body: data,
+  //     });
+     
+  //     setImages([...images, `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`]);
+  //     const responseData = await res.json(); 
+  //     onChange( `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`);
+  //     if (!res.ok) throw new Error(await res.text());
+  //   } catch (e: any) {
+  //     // Handle errors here
+  //     console.error(e);
+  //   }
+  // };
 
   const onDelete = async (url: string) => {
     try {
@@ -69,8 +94,9 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
       if (!res.ok) throw new Error(await res.text());
       setImages(images.filter((img) => img !== url));
       onRemove(url);
+      toast.success("Зображення видалено.");
     } catch (e: any) {
-      // Handle errors here
+      toast.error("Помилка видалення.");
       console.error(e);
     }finally {
       setLoading(false);
@@ -83,7 +109,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
 
   return (
     <div>
-      <DragDropFiles isOpen={dragDropOpen} />
+      <DragDropFiles isOpen={dragDropOpen} multipe={multipe}  onClose={() => setDragDropOpen(false)} onUploadComplete={handleUploadComplete}/>
       <div className="flex mb-4 items-center gap-4">
       {images.length > 0 &&
         images.map((url, i) => (
@@ -108,13 +134,14 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
         </div>
 
       <div >
-        <Input
+        {/* <Input
         className="w-1/3 mb-5"
           type="file"
           name="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files?.[0])}
-        />
+        /> */}
+        {!multipe && images.length > 0 && (<p className="text-sm text-gray-500 mb-2">Зображення видалиться при завантаженні нового</p>)}
         <Button
           type="button"
           disabled={disabled}
