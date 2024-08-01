@@ -228,7 +228,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           className="space-y-8 w-full"
         >
           {form.getValues("orderItems")?.map((item, index) => (
-            <div key={index} className=" grid grid-cols-3 items-end gap-8 mb-2">
+            <div key={index} className=" grid grid-cols-1 lg:grid-cols-3 items-end gap-8 mb-2">
               <FormField
                 control={form.control}
                 name={`orderItems.${index}.productId`}
@@ -330,17 +330,17 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           </Button>
 
           <Separator />
-          <div className="grid grid-cols-3 items-end gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 items-end gap-8">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>П.І.Б.</FormLabel>
+                  <FormLabel>Ім&apos;я</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Введіть Ім'я"
+                      placeholder="Введіть Ім&apos;я"
                       {...field}
                     />
                   </FormControl>
@@ -353,7 +353,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               name="surname"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>П.І.Б.</FormLabel>
+                  <FormLabel>Прізвище</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
@@ -388,7 +388,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               name="city"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Адреса</FormLabel>
+                  <FormLabel>Місто</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
@@ -405,7 +405,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Адреса</FormLabel>
+                  <FormLabel>Адреса/Відділення</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}

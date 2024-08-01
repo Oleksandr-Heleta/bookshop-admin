@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   const filePaths = await Promise.all(files.map(async (file) => {
     const bytes = await file.arrayBuffer();
     const buffer = await sharp(bytes).toBuffer();
-    const filePath = path.join(process.cwd(), 'public', file.name); // change public to images folder
+    const filePath = path.join(process.cwd(), 'images', file.name); // change public to images folder
     await writeFile(filePath, buffer);
     return {
       filePath,

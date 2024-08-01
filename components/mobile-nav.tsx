@@ -1,15 +1,29 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from './ui/button';
 
-export function MainNav({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLElement>) {
+const MobileNav = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
   const pathname = usePathname();
   const params = useParams();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+  }, [isOpen]);
 
   const routes = [
     {
@@ -53,20 +67,51 @@ export function MainNav({
       active: pathname === `/${params.storeId}/settings`,
     },
   ];
+
   return (
-    <nav className={cn(" items-center space-x-4 lg:space-x-6", className)}>
-      {routes.map((route) => (
+    <>
+      <Button onClick={toggleMenu} className='m-2 lg:hidden'>
+      <Menu size={20} />
+        </Button>
+
+      <div
+        className={`fixed z-10 inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        // onClick={toggleMenu}
+      >
+
+
+      <div
+        className={`fixed z-10 top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="h-16 flex items-center justify-center bg-primary text-white">
+          Меню
+        </div>
+       <Button onClick={toggleMenu} className='absolute top-2 right-2 text-white'>
+      <X size={20} />
+        </Button>
+        <nav className="p-4 mt-2 flex flex-col divide-y-2">
+        {routes.map((route) => (
         <Link
           key={route.href}
           href={route.href}
+          onClick={toggleMenu}
           className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
+            "text-lg font-medium transition-colors p-2 hover:text-primary",
             route.active ? "text-black dark:text-white" : "text-muted-foreground"
           )}
         >
           {route.label}
         </Link>
       ))}
-    </nav>
+        </nav>
+      </div>
+      </div>
+    </>
   );
-}
+};
+
+export default MobileNav;

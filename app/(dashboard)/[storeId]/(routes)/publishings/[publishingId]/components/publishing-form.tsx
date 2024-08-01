@@ -120,7 +120,7 @@ export const PublishingForm: React.FC<PublishingFormProps> = ({
           className="space-y-8 w-full"
         >
          
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="name"

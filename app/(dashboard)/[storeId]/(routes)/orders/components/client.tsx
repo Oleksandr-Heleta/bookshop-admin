@@ -30,7 +30,7 @@ const params = useParams();
         </Button>
         </div>
       <Separator />
-      <DataTable searchKey="products" columns={columns} data={data} />
+      <DataTable searchKey="phone" columns={columns} data={data} />
     </>
   );
 };

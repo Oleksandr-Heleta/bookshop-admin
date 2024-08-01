@@ -3,7 +3,8 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { CellAction } from "./cell-action"
 import { statuses, states } from "@/lib/utils";
-import { CheckCircle, Circle  } from 'lucide-react';
+import { CheckCircle, Circle,  ArrowUpDown, MoreHorizontal  } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 
 export type OrderColumn = {
@@ -53,8 +54,19 @@ export const columns: ColumnDef<OrderColumn>[] = [
   },
 
   {
-    accessorKey: "orderState",
-    header: "Оплата",
+    accessorKey: "isPaid",
+    header: 
+    ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+         Оплата
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({row})=>{
       return <div className="flex gap-2">
           {row.original.isPaid ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Circle className="h-4 w-4 text-red-500" />}
@@ -64,7 +76,18 @@ export const columns: ColumnDef<OrderColumn>[] = [
   },
   {
    accessorKey: "orderStatus",
-   header: "Стаус",
+   header:
+   ({ column }) => {
+    return (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Стаус
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    )
+  },
    cell: ({row})=>{
     return statuses.find(stat => stat.value === row.original.orderStatus)?.name;
    }
