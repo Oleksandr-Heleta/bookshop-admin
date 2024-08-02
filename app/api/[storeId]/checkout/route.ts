@@ -139,7 +139,7 @@ export async function POST(
 
     await Promise.all(updateProductPromises);
 
-    await sendMessage({name, phone , totalPrice, orderItems, call, payment});
+    await sendMessage({name, surname, phone , totalPrice, orderItems, call, payment});
 
     let linkUrl = `${process.env.FRONTEND_STORE_URL}/cart?success=true`;
 

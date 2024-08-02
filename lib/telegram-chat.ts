@@ -2,6 +2,7 @@ const Api = 'https://api.telegram.org/bot';
 
 interface sendMessageProps {
     name: string;
+    surname: string;
     phone: number;
     totalPrice: number; 
     call: boolean;
@@ -20,7 +21,7 @@ export const sendMessage = async ( order : sendMessageProps) => {
 
     const text = `
         Нове замовлення
-        Від ${order.name}
+        Від ${order.name} ${order.surname}
         телефон: ${order.phone}
         Замовлені книги: ${order.orderItems.map((item) => `
         ${item.product.name} - ${item.quantity} шт. 
