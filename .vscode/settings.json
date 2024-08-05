@@ -1,0 +1,14 @@
+{
+    "sshfs.configs": [
+        {
+            "name": "bookshopadmin"
+        },
+        {
+            "name": "mouse-admin",
+            "host": "mouse-admin.com.ua",
+            "root": "~/bookshop",
+            "agent": "pageant",
+            "username": "root"
+        }
+    ]
+}
