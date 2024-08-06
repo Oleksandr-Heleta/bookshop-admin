@@ -69,7 +69,7 @@ const formShema = z.object({
   sheets: z.coerce.number().positive().min(1),
   size: z.string().min(1),
   titleSheet: z.string().min(1),
-  video: z.string().min(1).optional(),
+  video: z.string().optional(),
 });
 
 type ProductFormValues = z.infer<typeof formShema>;

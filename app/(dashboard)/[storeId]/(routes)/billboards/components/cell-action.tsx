@@ -66,10 +66,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>Дії</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => onCopy(data.id)}>
             <Copy className="mr-2 h-4 w-4" />
-            Copy Id
+            Копіювати Id
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
@@ -77,11 +77,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             }
           >
             <Edit className="mr-2 h-4 w-4" />
-            Update
+            Редагувати
           </DropdownMenuItem>
           <DropdownMenuItem onClick={()=>setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" />
-            Delete
+           Видалити
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

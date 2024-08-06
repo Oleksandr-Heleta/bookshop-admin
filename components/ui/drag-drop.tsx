@@ -80,39 +80,7 @@ const DragDropFiles: React.FC<DragDropFilesProps> = ({
     }
   };
 
-  if (files)
-    return (
-      <Modal
-        title="Завантаження зображень"
-        description="Завантажте зображення тут."
-        isOpen={isOpen}
-        onClose={onClose}
-      >
-        <div className="">
-          <ul className="border rounded-md flex flex-col gap-3 mb-2">
-            {Array.from(files).map((file, idx) => (
-              <li key={idx}>{file.name}</li>
-            ))}
-          </ul>
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              disabled={loading}
-              onClick={() => setFiles(null)}
-            >
-              Скасувати
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={loading}
-              onClick={handleUpload}
-            >
-              Завантажити
-            </Button>
-          </div>
-        </div>
-      </Modal>
-    );
+  
 
   return (
     <Modal
@@ -140,6 +108,31 @@ const DragDropFiles: React.FC<DragDropFilesProps> = ({
           Виберіть зображення
         </Button>
       </div>
+      {files && (
+         <div className="mt-2">
+         <ul className=" flex flex-col gap-3 divide-y-2 mb-4">
+           {Array.from(files).map((file, idx) => (
+             <li key={idx}>{file.name}</li>
+           ))}
+         </ul>
+         <div className="flex justify-end gap-3">
+           <Button
+             variant="outline"
+             disabled={loading}
+             onClick={() => setFiles(null)}
+           >
+             Скасувати
+           </Button>
+           <Button
+             variant="destructive"
+             disabled={loading}
+             onClick={handleUpload}
+           >
+             Завантажити
+           </Button>
+         </div>
+       </div>
+      )}
     </Modal>
   );
 };

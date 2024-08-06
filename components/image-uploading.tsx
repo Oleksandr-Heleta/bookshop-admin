@@ -8,6 +8,7 @@ import { Input } from "./ui/input";
 import { Trash, ImagePlus } from "lucide-react";
 import DragDropFiles from "@/components/ui/drag-drop";
 import { set } from "date-fns";
+import { number } from "zod";
 
 interface ImageUploadProps {
   disabled?: boolean;
@@ -24,11 +25,13 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
   value,
   multipe,
 }) => {
-  const [file, setFile] = useState<File>();
+  
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>(value);
   const [isMounted, setIsMounted] = useState(false);
   const [dragDropOpen, setDragDropOpen] = useState(false);
+  const [dragItemIndex, setDragItemIndex] = useState<number | undefined>();
+  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | undefined>();
 
   useEffect(() => {
     setIsMounted(true);
@@ -38,6 +41,38 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
   useEffect(() => {
     // console.log("images updated", images);
   }, [images]);
+
+  const handleDragStart = (index: number) => {
+    setDragItemIndex(index)
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+  }
+
+  const handleDrop = () => {
+    const _images = [...images];
+    if (dragItemIndex !== undefined && dragOverItemIndex !== undefined) {
+      const dragItem = _images.splice(dragItemIndex, 1);
+      _images.splice(dragOverItemIndex, 0, ...dragItem);
+      setImages(_images);
+    }
+  }
+
+  const handleDragEnter = (index: number) => {
+    setDragOverItemIndex(index)
+  }
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    setDragOverItemIndex(undefined)
+  }
+
+  const handleDragEnd = (event: React.DragEvent) => {
+    setDragItemIndex(undefined);
+    setDragOverItemIndex(undefined);
+    onChange(images);
+  }
+
 
   const handleUploadComplete = async (urls: string[]) => {
     if(!multipe){
@@ -56,29 +91,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
   };
 
 
-  // const onUpload = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-  //   e.preventDefault();
-  
-  //   if (!file) return;
 
-  //   try {
-  //     const data = new FormData();
-  //     data.set("file", file);
-     
-  //     const res = await fetch("/api/upload", {
-  //       method: "POST",
-  //       body: data,
-  //     });
-     
-  //     setImages([...images, `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`]);
-  //     const responseData = await res.json(); 
-  //     onChange( `${process.env.NEXT_PUBLIC_IMAGE_STORE_URL}/${file.name}`);
-  //     if (!res.ok) throw new Error(await res.text());
-  //   } catch (e: any) {
-  //     // Handle errors here
-  //     console.error(e);
-  //   }
-  // };
 
   const onDelete = async (url: string) => {
     try {
@@ -116,6 +129,13 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
           <div
             key={i}
             className="relative w-[200px] h-[200px] border rounded-md overflow-hiden"
+            draggable={multipe}
+            onDragStart={() => handleDragStart(i)}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop()}
+            onDragEnter={() => handleDragEnter(i)}
+            onDragLeave={handleDragLeave}
+            onDragEnd={handleDragEnd}
           >
             <div className="z-10 absolute top-2 right-2">
               <Button
@@ -128,7 +148,7 @@ export const ImageUploading: React.FC<ImageUploadProps> = ({
                 <Trash className="h-4 w-4" />
               </Button>
             </div>
-            <Image fill className="object-contain" src={url} alt="Image" />
+            <Image fill className="object-contain" src={url} alt={`Image ${url}`} />
           </div>
         ))}
         </div>
