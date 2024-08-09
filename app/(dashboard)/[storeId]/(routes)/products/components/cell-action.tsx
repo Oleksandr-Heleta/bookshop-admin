@@ -42,8 +42,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       toast.success("Продукт видалено.");
     } catch (error) {
       toast.error(
-        "Somthing went wrong!"
+        "Щось пішло не так!"
       );
+      console.error(error);
     } finally {
       setLoading(false);
       setOpen(false);

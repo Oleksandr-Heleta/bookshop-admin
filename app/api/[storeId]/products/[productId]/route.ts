@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs";
 import { de } from "date-fns/locale";
 import { NextResponse } from "next/server";
 
+
 export async function GET(
   req: Request,
   { params }: { params: { productId: string } }
@@ -16,10 +17,14 @@ export async function GET(
         id: params.productId,
       },
       include: {
-        images: true,
-        categories: true,
-        publishing: true,
-        ageGroups: true,
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+        categories: {},
+        publishing: {},
+        ageGroups: {},
       },
     });
 
@@ -108,7 +113,7 @@ export async function PATCH(
         images: {
           deleteMany: {},
           createMany: {
-            data: images.map((image: { url: string }) => ({ url: image.url })),
+            data: images.map((image: { url: string }, index: number) => ({ url: image.url, order: index })),
           },
         },
         ageGroups: {
@@ -129,6 +134,7 @@ export async function PATCH(
             })),
           },
         },
+       
       },
     });
 
@@ -149,8 +155,9 @@ export async function DELETE(
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
 
     if (!params.productId)
-      return new NextResponse("Prorduct ID is required", { status: 400 });
+      return new NextResponse("Product ID is required", { status: 400 });
 
+    console.log("Fetching store by user ID...");
     const storeByUserId = await prismadb.store.findFirst({
       where: {
         id: params.storeId,
@@ -162,35 +169,59 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
+    console.log("Deleting images...");
+    const images = await prismadb.image.findMany({
+      where: {
+        productId: params.productId,
+      },
+    });
+
+
+    
+    const delImages = await Promise.all(images.map(async (image) => {
+      await fetch(`https://mouse-admin.com.ua/api/upload`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({filename:  image.url }),
+      });
+    }))
+ 
+  
+
+    console.log("Deleting categories...");
     const categories = await prismadb.categoriesToProduct.deleteMany({
       where: {
         productId: params.productId,
       },
     });
 
+    console.log("Deleting age groups...");
     const ageGroups = await prismadb.ageGroupToProduct.deleteMany({
       where: {
         productId: params.productId,
       },
     });
 
+    console.log("Updating order items...");
     const orderItems = await prismadb.orderItem.updateMany({
       where: {
         productId: params.productId,
       },
-      data:{
+      data: {
         productId: null,
-      }
-     
+      },
     });
 
+    console.log("Deleting product...");
     const product = await prismadb.product.deleteMany({
       where: {
         id: params.productId,
       },
     });
 
-   
+    console.log("Product deleted successfully");
 
     return NextResponse.json(product);
   } catch (error) {

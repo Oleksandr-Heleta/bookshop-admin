@@ -103,7 +103,7 @@ export async function POST(
         storeId: params.storeId,
         images: {
           createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+            data: [...images.map((image: { url: string }, index: number) => ({ url: image.url, order: index }))],
           },
         },
         ageGroups: {
@@ -130,6 +130,7 @@ export async function POST(
             ],
           },
         },
+        
       },
     });
 
@@ -193,7 +194,11 @@ export async function GET(
         isArchived: false,
       },
       include: {
-        images: true,
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
         categories: true,
         publishing: true,
         ageGroups: true,

@@ -191,6 +191,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       toast.success("Продукт видалено.");
     } catch (error) {
       toast.error("Щось пішло не так!");
+      console.error(error);
     } finally {
       setLoading(false);
       setOpen(false);
@@ -246,8 +247,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       field.onChange([
                         ...field.value.filter((current) => current.url != url),
                       ])
-                      console.log(newImages);
-                      initialData && onSubmit({ ...form.getValues(), images: newImages }, false);
+                      // console.log(newImages);
+                      initialData && newImages.length && onSubmit({ ...form.getValues(), images: newImages }, false);
                     }
                     }
                   />

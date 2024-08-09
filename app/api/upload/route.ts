@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     index++;
   }
   
-  console.log("Retrieved files:", files);
+  // console.log("Retrieved files:", files);
 
   if (!files || files.length === 0) {
     return NextResponse.json({ success: false });
@@ -26,11 +26,12 @@ export async function POST(request: NextRequest) {
   const filePaths = await Promise.all(files.map(async (file) => {
     const bytes = await file.arrayBuffer();
     const buffer = await sharp(bytes).toBuffer();
-    const filePath = path.join(process.cwd(), 'images', file.name); // change public to images folder
+    const fileName = `${Date.now()}_${file.name}`;
+    const filePath = path.join(process.cwd(), 'images', fileName); // change public to images folder
     await writeFile(filePath, buffer);
     return {
       filePath,
-      fileName: file.name
+      fileName,
     };
   }));
 
