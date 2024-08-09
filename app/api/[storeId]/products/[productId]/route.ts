@@ -157,7 +157,7 @@ export async function DELETE(
     if (!params.productId)
       return new NextResponse("Product ID is required", { status: 400 });
 
-    console.log("Fetching store by user ID...");
+    // console.log("Fetching store by user ID...");
     const storeByUserId = await prismadb.store.findFirst({
       where: {
         id: params.storeId,
@@ -169,7 +169,7 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    console.log("Deleting images...");
+    // console.log("Deleting images...");
     const images = await prismadb.image.findMany({
       where: {
         productId: params.productId,
@@ -190,38 +190,38 @@ export async function DELETE(
  
   
 
-    console.log("Deleting categories...");
+    // console.log("Deleting categories...");
     const categories = await prismadb.categoriesToProduct.deleteMany({
       where: {
         productId: params.productId,
       },
     });
 
-    console.log("Deleting age groups...");
+    // console.log("Deleting age groups...");
     const ageGroups = await prismadb.ageGroupToProduct.deleteMany({
       where: {
         productId: params.productId,
       },
     });
 
-    console.log("Updating order items...");
+    // console.log("Updating order items...");
     const orderItems = await prismadb.orderItem.updateMany({
       where: {
         productId: params.productId,
       },
       data: {
-        productId: null,
+        productId: "0",
       },
     });
 
-    console.log("Deleting product...");
+    // console.log("Deleting product...");
     const product = await prismadb.product.deleteMany({
       where: {
         id: params.productId,
       },
     });
 
-    console.log("Product deleted successfully");
+    // console.log("Product deleted successfully");
 
     return NextResponse.json(product);
   } catch (error) {
