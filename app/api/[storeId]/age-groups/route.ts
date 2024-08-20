@@ -67,7 +67,10 @@ export async function GET(
     const ageGroup = await prismadb.ageGroup.findMany({
         where:{
             storeId: params.storeId
-        }
+        },
+        orderBy: {
+          value: "asc",
+        },
     });
 
     return NextResponse.json(ageGroup);

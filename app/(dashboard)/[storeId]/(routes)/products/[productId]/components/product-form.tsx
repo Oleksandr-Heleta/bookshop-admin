@@ -191,7 +191,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       toast.success("Продукт видалено.");
     } catch (error) {
       toast.error("Щось пішло не так!");
-      console.error(error);
+      // console.error(error);
     } finally {
       setLoading(false);
       setOpen(false);
