@@ -1,5 +1,5 @@
 // pages/api/webhook.ts
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import crypto from 'crypto';
 
@@ -28,8 +28,8 @@ const getMonobankPublicKey = async () => {
   return data.key;
 };
 
-const verifySignature = (req: NextApiRequest, publicKey: string) => {
-  const signature = req.headers['x-signature'] as string;
+const verifySignature = (req: Request, publicKey: string) => {
+  const signature = req.headers.get('x-signature') as string;
   const body = JSON.stringify(req.body);
   const verifier = crypto.createVerify('SHA256');
   verifier.update(body);
@@ -37,7 +37,7 @@ const verifySignature = (req: NextApiRequest, publicKey: string) => {
   return verifier.verify(publicKey, signature, 'base64');
 };
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req: Request, res: NextResponse) {
   try {
     // const secret = process.env.MONOBANK_WEBHOOK_SECRET;
     // if (!secret) {
@@ -51,10 +51,11 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
     const publicKey = await getMonobankPublicKey();
 
     if (!verifySignature(req, publicKey)) {
-      return res.status(401).json({ error: 'Invalid signature' });
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    const { invoiceId, status } = req.body;
+    const body = await req.json();
+    const { invoiceId, status } = body;
 
     console.log('[WEBHOOK]', req.body);
 
@@ -73,9 +74,12 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    res.status(200).json({ message: 'Webhook received' });
+    return NextResponse.json({ message: 'Webhook received' }, { status: 200 });
   } catch (error) {
     console.error('[WEBHOOK_ERROR]', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
