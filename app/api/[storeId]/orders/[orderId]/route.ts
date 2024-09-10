@@ -1,7 +1,17 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
-import { Order, OrderItem, Image, Product } from "@prisma/client";
+import prismadb from '@/lib/prismadb';
+import { auth } from '@clerk/nextjs';
+import { NextResponse } from 'next/server';
+import { Order, OrderItem, Image, Product } from '@prisma/client';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': `${process.env.FRONTEND_STORE_URL}`,
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function GET(
   req: Request,
@@ -9,7 +19,7 @@ export async function GET(
 ) {
   try {
     if (!params.orderId)
-      return new NextResponse("Order ID is required", { status: 400 });
+      return new NextResponse('Order ID is required', { status: 400 });
 
     const order = await prismadb.order.findUnique({
       where: {
@@ -17,10 +27,10 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(order);
+    return NextResponse.json({ order }, { headers: corsHeaders }); //
   } catch (error) {
-    console.log("[ORDER_GET]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.log('[ORDER_GET]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
@@ -48,7 +58,7 @@ export async function PATCH(
       totalPrice,
     } = body;
 
-    if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
+    if (!userId) return new NextResponse('Unauthenticated', { status: 401 });
 
     const oldOrder = await prismadb.order.findUnique({
       where: { id: params.orderId },
@@ -87,7 +97,7 @@ export async function PATCH(
         let product: Product | null;
         if (oldProduct) {
           // Зменшення кількості
-           product = await prismadb.product.update({
+          product = await prismadb.product.update({
             where: { id: newProduct.id },
             data: {
               quantity: {
@@ -95,8 +105,6 @@ export async function PATCH(
               },
             },
           });
-         
-
         } else {
           // Збільшення кількості, якщо товар відсутній в старому замовленні
           product = await prismadb.product.update({
@@ -136,8 +144,8 @@ export async function PATCH(
 
     if (
       isPaid ||
-      orderState === "byIBAN" ||
-      (orderState === "afterrecive" && orderStatus === "sended")
+      orderState === 'byIBAN' ||
+      (orderState === 'afterrecive' && orderStatus === 'sended')
     ) {
       isPaid = true;
     }
@@ -172,8 +180,8 @@ export async function PATCH(
 
     return NextResponse.json(updatedOrder);
   } catch (error) {
-    console.log("[ORDER_PACH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.log('[ORDER_PACH]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
@@ -184,10 +192,10 @@ export async function DELETE(
   try {
     const { userId } = auth();
 
-    if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
+    if (!userId) return new NextResponse('Unauthenticated', { status: 401 });
 
     if (!params.orderId)
-      return new NextResponse("ORDER ID is required", { status: 400 });
+      return new NextResponse('ORDER ID is required', { status: 400 });
 
     const storeByUserId = await prismadb.store.findFirst({
       where: {
@@ -197,7 +205,7 @@ export async function DELETE(
     });
 
     if (!storeByUserId) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return new NextResponse('Unauthorized', { status: 403 });
     }
 
     const order = await prismadb.order.findUnique({
@@ -234,7 +242,7 @@ export async function DELETE(
 
     return NextResponse.json(deletedOrder);
   } catch (error) {
-    console.log("[ORDER_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.log('[ORDER_DELETE]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }

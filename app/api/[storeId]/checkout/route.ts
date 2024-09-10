@@ -149,7 +149,7 @@ export async function POST(
       payment,
     });
 
-    let linkUrl = `${process.env.FRONTEND_STORE_URL}/cart?success=true`;
+    let linkUrl = `${process.env.FRONTEND_STORE_URL}/cart?orderId=${order.id}`;
 
     if (payment === 'online') {
       if (!process.env.MONOBANK_API_TOKEN) {
@@ -174,14 +174,14 @@ export async function POST(
                 .map((item: { product: { name: string } }) => item.product.name)
                 .join(', ')}`,
             },
-            redirectUrl: `${process.env.FRONTEND_STORE_URL}/cart?success=true`,
-            webhookUrl: `${process.env.NEXT_PUBLIC_API_URL}/api/webhook`,
+            redirectUrl: `${process.env.FRONTEND_STORE_URL}/cart?orderId=${order.id}`,
+            webhookUrl: `${process.env.NEXT_PUBLIC_API_URL}/webhook`,
           }),
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to create invoice');
+        throw new Error(`Failed to create invoice: ${response.statusText}`);
       }
 
       const invoiceData = await response.json();

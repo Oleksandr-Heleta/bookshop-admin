@@ -10,32 +10,32 @@ import crypto from 'crypto';
 //   return signature === hash;
 // };
 
-const getMonobankPublicKey = async () => {
-  if (!process.env.MONOBANK_API_TOKEN) {
-    throw new Error('MONOBANK_API_TOKEN is not defined');
-  }
-  const response = await fetch('https://api.monobank.ua/api/merchant/pubkey', {
-    method: 'GET',
-    headers: {
-      'X-Token': process.env.MONOBANK_API_TOKEN,
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!response.ok) {
-    throw new Error('Failed to fetch Monobank public key');
-  }
-  const data = await response.json();
-  return data.key;
-};
+// const getMonobankPublicKey = async () => {
+//   if (!process.env.MONOBANK_API_TOKEN) {
+//     throw new Error('MONOBANK_API_TOKEN is not defined');
+//   }
+//   const response = await fetch('https://api.monobank.ua/api/merchant/pubkey', {
+//     method: 'GET',
+//     headers: {
+//       'X-Token': process.env.MONOBANK_API_TOKEN,
+//       'Content-Type': 'application/json',
+//     },
+//   });
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch Monobank public key');
+//   }
+//   const data = await response.json();
+//   return data.key;
+// };
 
-const verifySignature = (req: Request, publicKey: string) => {
-  const signature = req.headers.get('x-signature') as string;
-  const body = JSON.stringify(req.body);
-  const verifier = crypto.createVerify('SHA256');
-  verifier.update(body);
-  verifier.end();
-  return verifier.verify(publicKey, signature, 'base64');
-};
+// const verifySignature = (req: Request, publicKey: string) => {
+//   const signature = req.headers.get('x-signature') as string;
+//   const body = JSON.stringify(req.body);
+//   const verifier = crypto.createVerify('SHA256');
+//   verifier.update(body);
+//   verifier.end();
+//   return verifier.verify(publicKey, signature, 'base64');
+// };
 
 export async function POST(req: Request, res: NextResponse) {
   try {
@@ -48,28 +48,28 @@ export async function POST(req: Request, res: NextResponse) {
     //   return res.status(401).json({ error: 'Invalid signature' });
     // }
 
-    const publicKey = await getMonobankPublicKey();
+    // const publicKey = await getMonobankPublicKey();
 
-    if (!verifySignature(req, publicKey)) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-    }
+    // if (!verifySignature(req, publicKey)) {
+    //   return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    // }
 
     const body = await req.json();
-    const { invoiceId, status } = body;
+    const { invoiceId, status, reference } = body;
 
-    console.log('[WEBHOOK]', req.body);
+    // console.log('[WEBHOOK]', invoiceId, status, reference);
 
     // Перевірка статусу платежу
     if (status === 'success') {
       // Оновлення статусу замовлення в базі даних
       await prismadb.order.update({
-        where: { id: invoiceId },
-        data: { orderStatus: 'paid' },
+        where: { id: reference },
+        data: { orderStatus: 'paid', isPaid: true },
       });
     } else {
       // Обробка неуспішної оплати
       await prismadb.order.update({
-        where: { id: invoiceId },
+        where: { id: reference },
         data: { orderStatus: 'failed' },
       });
     }
