@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Category,
@@ -8,15 +8,15 @@ import {
   AgeGroup,
   AgeGroupToProduct,
   CategoriesToProduct,
-} from "@prisma/client";
-import { Heading } from "@/components/ui/heading";
-import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import * as z from "zod";
-import { set, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+} from '@prisma/client';
+import { Heading } from '@/components/ui/heading';
+import { Button } from '@/components/ui/button';
+import { Trash } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import * as z from 'zod';
+import { set, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import {
   Form,
   FormControl,
@@ -25,25 +25,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import toast from "react-hot-toast";
-import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
-import { AlertModal } from "@/components/modals/alert-modal";
-import ImageUpload from "@/components/ui/image-upload";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { useParams, useRouter } from 'next/navigation';
+import { AlertModal } from '@/components/modals/alert-modal';
+import ImageUpload from '@/components/ui/image-upload';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import MultipleSelector from "@/components/ui/multi-select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ImageUploading } from "@/components/image-uploading";
-import { Decimal } from "@prisma/client/runtime/library";
+} from '@/components/ui/select';
+import MultipleSelector from '@/components/ui/multi-select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ImageUploading } from '@/components/image-uploading';
+import { Decimal } from '@prisma/client/runtime/library';
 
 const optionSchema = z.object({
   label: z.string(),
@@ -114,10 +114,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Редагування товару" : "Створення товару";
-  const description = initialData ? "Редагувани товар" : "Додати новий товар";
-  const toastMessage = initialData ? "Продукт оновлено." : "Продукт створено.";
-  const action = initialData ? "Зберегти зміни" : "Створити";
+  const title = initialData ? 'Редагування товару' : 'Створення товару';
+  const description = initialData ? 'Редагувани товар' : 'Додати новий товар';
+  const toastMessage = initialData ? 'Продукт оновлено.' : 'Продукт створено.';
+  const action = initialData ? 'Зберегти зміни' : 'Створити';
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formShema),
@@ -137,8 +137,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             : [],
         }
       : {
-          name: "",
-          description: "",
+          name: '',
+          description: '',
           images: [],
           quantity: 1,
           price: 0,
@@ -147,14 +147,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           sale: 0,
           isLowQuantity: false,
           categories: [],
-          publishingId: "",
+          publishingId: '',
           ageGroups: [],
           isFeatured: false,
           isArchived: false,
           sheets: 0,
-          size: "",
-          titleSheet: "",
-          video: "",
+          size: '',
+          titleSheet: '',
+          video: '',
         },
   });
 
@@ -171,12 +171,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         await axios.post(`/api/${params.storeId}/products`, data);
       }
       router.refresh();
-      if (goOut){
-        router.push(`/${params.storeId}/products`);
+      if (goOut) {
+        if (initialData) {
+          router.back();
+        } else {
+          router.push(`/${params.storeId}/products`);
+        }
       }
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Щось пішло не так!");
+      toast.error('Щось пішло не так!');
     } finally {
       setLoading(false);
     }
@@ -188,9 +192,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
       router.refresh();
       router.push(`/${params.storeId}/products`);
-      toast.success("Продукт видалено.");
+      toast.success('Продукт видалено.');
     } catch (error) {
-      toast.error("Щось пішло не так!");
+      toast.error('Щось пішло не так!');
       // console.error(error);
     } finally {
       setLoading(false);
@@ -240,17 +244,27 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     onChange={(urls) => {
                       const newImages = urls.map((url) => ({ url }));
                       field.onChange(newImages);
-                      initialData && onSubmit({ ...form.getValues(), images: newImages }, false);
+                      initialData &&
+                        onSubmit(
+                          { ...form.getValues(), images: newImages },
+                          false
+                        );
                     }}
                     onRemove={(url) => {
-                      const newImages = form.getValues('images').filter((current) => current.url != url);
+                      const newImages = form
+                        .getValues('images')
+                        .filter((current) => current.url != url);
                       field.onChange([
                         ...field.value.filter((current) => current.url != url),
-                      ])
+                      ]);
                       // console.log(newImages);
-                      initialData && newImages.length && onSubmit({ ...form.getValues(), images: newImages }, false);
-                    }
-                    }
+                      initialData &&
+                        newImages.length &&
+                        onSubmit(
+                          { ...form.getValues(), images: newImages },
+                          false
+                        );
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -473,7 +487,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <div className="space-y-1 leading-none">
                       <FormLabel>Новинка</FormLabel>
                       <FormDescription>
-                        Цей товар буде отримає відмітку{" "}
+                        Цей товар буде отримає відмітку{' '}
                         <span className="bg-red-700 rounded-xl text-white p-2 text-xs">
                           НОВИНКА
                         </span>
@@ -496,7 +510,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <div className="space-y-1 leading-none">
                       <FormLabel>Закінчується</FormLabel>
                       <FormDescription>
-                        Цей товар буде отримає відмітку{" "}
+                        Цей товар буде отримає відмітку{' '}
                         <span className="bg-amber-200 rounded-xl text-white p-2 text-xs">
                           ЗАКІНЧУЄТЬСЯ
                         </span>
@@ -521,7 +535,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <div className="space-y-1 leading-none">
                       <FormLabel>Акція</FormLabel>
                       <FormDescription>
-                        Цей товар отримає відмітку{" "}
+                        Цей товар отримає відмітку{' '}
                         <span className="bg-orange-500 rounded-xl text-white p-2 text-xs">
                           АКЦІЯ
                         </span>
@@ -626,7 +640,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               )}
             />
           </div>
-          <Button disabled={loading} className="ml-auto" type="submit" >
+          <Button disabled={loading} className="ml-auto" type="submit">
             {action}
           </Button>
         </form>

@@ -1,7 +1,8 @@
-"use client";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+'use client';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import {
   ColumnDef,
@@ -13,7 +14,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table";
+} from '@tanstack/react-table';
 
 import {
   Table,
@@ -22,7 +23,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -33,12 +34,14 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  searchKey
-}: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-    []
-  )
-  const [sorting, setSorting] = useState<SortingState>([])
+  searchKey,
+  page,
+  pageSize,
+}: DataTableProps<TData, TValue> & { page: number; pageSize: number }) {
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const table = useReactTable({
     data,
@@ -52,15 +55,39 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
       sorting,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize,
+      },
     },
   });
 
+  useEffect(() => {
+    table.setPageIndex(page - 1);
+    table.setPageSize(pageSize);
+  }, [page, pageSize, table]);
+
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('pageSize', newPageSize.toString());
+    params.set('page', '1');
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div>
-       <div className="flex items-center py-4">
+      <div className="flex items-center py-4">
         <Input
           placeholder="Пошук"
-          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
             table.getColumn(searchKey)?.setFilterValue(event.target.value)
           }
@@ -92,7 +119,7 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -121,7 +148,7 @@ export function DataTable<TData, TValue>({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.previousPage()}
+          onClick={() => handlePageChange(page - 1)}
           disabled={!table.getCanPreviousPage()}
         >
           Попередня
@@ -129,11 +156,21 @@ export function DataTable<TData, TValue>({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.nextPage()}
+          onClick={() => handlePageChange(page + 1)}
           disabled={!table.getCanNextPage()}
         >
           Наступна
         </Button>
+        <select
+          value={pageSize}
+          onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+        >
+          {[10, 20, 30, 40, 50].map((size) => (
+            <option key={size} value={size}>
+              Показати {size}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );
