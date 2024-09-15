@@ -2,7 +2,44 @@ import prismadb from '@/lib/prismadb';
 import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
 import { sendMessage } from '@/lib/telegram-chat';
-import { OrderItem } from '@prisma/client';
+import { OrderItem, Product, Image } from '@prisma/client';
+
+interface ProductWithImages extends Product {
+  images: Image[];
+}
+
+interface ProductWithQuantity {
+  quantity: number;
+  product: ProductWithImages;
+}
+
+async function getOrderItemsWithProductDetails(
+  orderItems: OrderItem[]
+): Promise<ProductWithQuantity[]> {
+  const result: ProductWithQuantity[] = [];
+
+  for (const orderItem of orderItems) {
+    const product = await prismadb.product.findUnique({
+      where: { id: orderItem.productId ?? undefined },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    });
+
+    if (product) {
+      result.push({
+        quantity: orderItem.quantity,
+        product,
+      });
+    }
+  }
+
+  return result;
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_STORE_URL}`,
@@ -79,6 +116,8 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 403 });
     }
 
+    const sale = storeByUserId.sale;
+
     if (isPaid || (payment === 'afterrecive' && orderStatus === 'sended')) {
       isPaid = true;
     }
@@ -139,6 +178,33 @@ export async function POST(
 
     await Promise.all(updateProductPromises);
 
+    const orderItemsWithProductDetails = await getOrderItemsWithProductDetails(
+      order.orderItems
+    );
+
+    const bascetOrder = orderItemsWithProductDetails.map(
+      (item: ProductWithQuantity) => {
+        const discount = [];
+        if (sale > 0 || item.product.isSale) {
+          const percent = item.product.isSale ? item.product.sale : sale;
+          discount.push({
+            type: 'DISCOUNT',
+            mode: 'PERCENT',
+            value: percent,
+          });
+        }
+        return {
+          name: item.product.name,
+          qty: item.quantity,
+          sum: item.product.price,
+          icon: item.product.images[0].url,
+          code: item.product.id,
+          unit: 'шт.',
+          discounts: discount,
+        };
+      }
+    );
+
     await sendMessage({
       name,
       surname,
@@ -170,9 +236,9 @@ export async function POST(
             merchantPaymInfo: {
               reference: order.id,
               destination: 'Оплата замовлення',
-              comment: `${orderItems
-                .map((item: { product: { name: string } }) => item.product.name)
-                .join(', ')}`,
+              comment: order.id,
+              customerEmails: ['peterone051@gmail.com'],
+              basketOrder: bascetOrder,
             },
             redirectUrl: `${process.env.FRONTEND_STORE_URL}/cart?orderId=${order.id}`,
             webhookUrl: `${process.env.NEXT_PUBLIC_API_URL}/webhook`,
