@@ -1,4 +1,5 @@
 import prismadb from '@/lib/prismadb';
+// import { Decimal } from '@prisma/client/runtime';
 import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
 import { sendMessage } from '@/lib/telegram-chat';
@@ -178,33 +179,6 @@ export async function POST(
 
     await Promise.all(updateProductPromises);
 
-    const orderItemsWithProductDetails = await getOrderItemsWithProductDetails(
-      order.orderItems
-    );
-
-    const bascetOrder = orderItemsWithProductDetails.map(
-      (item: ProductWithQuantity) => {
-        const discount = [];
-        if (sale > 0 || item.product.isSale) {
-          const percent = item.product.isSale ? item.product.sale : sale;
-          discount.push({
-            type: 'DISCOUNT',
-            mode: 'PERCENT',
-            value: percent,
-          });
-        }
-        return {
-          name: item.product.name,
-          qty: item.quantity,
-          sum: item.product.price,
-          icon: item.product.images[0].url,
-          code: item.product.id,
-          unit: 'шт.',
-          discounts: discount,
-        };
-      }
-    );
-
     await sendMessage({
       name,
       surname,
@@ -221,6 +195,37 @@ export async function POST(
       if (!process.env.MONOBANK_API_TOKEN) {
         throw new Error('MONOBANK_API_TOKEN is not defined');
       }
+
+      const orderItemsWithProductDetails =
+        await getOrderItemsWithProductDetails(order.orderItems);
+
+      const bascetOrder = orderItemsWithProductDetails.map(
+        (item: ProductWithQuantity) => {
+          const discount = [];
+          if (sale > 0 || item.product.isSale) {
+            const percent = item.product.isSale ? item.product.sale : sale;
+            discount.push({
+              type: 'DISCOUNT',
+              mode: 'PERCENT',
+              value: percent,
+            });
+          }
+          const price = item.product.price.toNumber(); // Перетворення ціни в число
+          const sum = price * 100; // Виконання арифметичної операції
+          // console.log(discount);
+          return {
+            name: item.product.name,
+            qty: item.quantity,
+            sum: sum,
+            icon: item.product.images[0].url,
+            code: item.product.id,
+            unit: 'шт.',
+            discounts: discount,
+          };
+        }
+      );
+
+      // console.log(bascetOrder);
       // Створення інвойсу в Monobank
       const response = await fetch(
         'https://api.monobank.ua/api/merchant/invoice/create',
