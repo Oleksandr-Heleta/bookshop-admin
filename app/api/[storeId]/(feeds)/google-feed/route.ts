@@ -64,7 +64,7 @@ export async function GET(
         (product) => `
       <item>
         <g:id>${product.id}</g:id>
-        <g:title><![CDATA[${product.name}]]></g:title>
+        <g:title><![CDATA[${product.name}. Дитяча книга]]></g:title>
         <g:description><![CDATA[${product.description}]]></g:description>
         <g:link>${process.env.FRONTEND_STORE_URL}/product/${product.id}</g:link>
         <g:image_link>${product.images[0]?.url ?? ''}</g:image_link>
@@ -96,10 +96,6 @@ export async function GET(
               categories.find((cat) => cat.id === category.categoryId)?.name
           )
           .join(', ')}]]</g:custom_label_1>
-        <g:shipping>
-          <g:country>UA</g:country>
-          <g:service>Standard Shipping</g:service>
-        </g:shipping>
       </item>
     `
       )
