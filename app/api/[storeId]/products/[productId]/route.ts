@@ -1,8 +1,7 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
-import { de } from "date-fns/locale";
-import { NextResponse } from "next/server";
-
+import prismadb from '@/lib/prismadb';
+import { auth } from '@clerk/nextjs';
+import { de } from 'date-fns/locale';
+import { NextResponse } from 'next/server';
 
 export async function GET(
   req: Request,
@@ -10,7 +9,7 @@ export async function GET(
 ) {
   try {
     if (!params.productId)
-      return new NextResponse("Product ID is required", { status: 400 });
+      return new NextResponse('Product ID is required', { status: 400 });
 
     const product = await prismadb.product.findUnique({
       where: {
@@ -23,15 +22,21 @@ export async function GET(
           },
         },
         categories: {},
+        suggestionProducts: {},
+        seria: {},
         publishing: {},
-        ageGroups: {},
+        ageGroups: {
+          orderBy: {
+            ageGroupName: 'asc',
+          },
+        },
       },
     });
 
     return NextResponse.json(product);
   } catch (error) {
-    console.log("[PRODUCT_GET]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.log('[PRODUCT_GET]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
@@ -45,13 +50,16 @@ export async function PATCH(
 
     let {
       name,
+      author,
       description,
       images,
       price,
       quantity,
       categories,
       publishingId,
+      seriaId,
       ageGroups,
+      suggestionProducts,
       isNew,
       isSale,
       sale,
@@ -61,18 +69,27 @@ export async function PATCH(
       sheets,
       size,
       titleSheet,
-      video
+      video,
+      isbn,
+      titleSeo,
+      descriptionSeo,
     } = body;
 
-    if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
-    if (!name) return new NextResponse("Name is required", { status: 400 });
-    if (!images || !images.length) return new NextResponse("Images are required", { status: 400 });
-    if (!price) return new NextResponse("Price is required", { status: 400 });
-    if (!quantity) return new NextResponse("Quantity is required", { status: 400 });
-    if (!categories.length) return new NextResponse("Categories is required", { status: 400 });
-    if (!ageGroups.length) return new NextResponse("ageGroups is required", { status: 400 });
-    if (!publishingId) return new NextResponse("publishing Id is required", { status: 400 });
-    if (!params.productId) return new NextResponse("Product ID is required", { status: 400 });
+    if (!userId) return new NextResponse('Unauthenticated', { status: 401 });
+    if (!name) return new NextResponse('Name is required', { status: 400 });
+    if (!images || !images.length)
+      return new NextResponse('Images are required', { status: 400 });
+    if (!price) return new NextResponse('Price is required', { status: 400 });
+    if (!quantity)
+      return new NextResponse('Quantity is required', { status: 400 });
+    if (!categories.length)
+      return new NextResponse('Categories is required', { status: 400 });
+    if (!ageGroups.length)
+      return new NextResponse('ageGroups is required', { status: 400 });
+    if (!publishingId)
+      return new NextResponse('publishing Id is required', { status: 400 });
+    if (!params.productId)
+      return new NextResponse('Product ID is required', { status: 400 });
 
     const storeByUserId = await prismadb.store.findFirst({
       where: {
@@ -82,7 +99,7 @@ export async function PATCH(
     });
 
     if (!storeByUserId) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return new NextResponse('Unauthorized', { status: 403 });
     }
 
     if (!quantity) {
@@ -95,10 +112,12 @@ export async function PATCH(
       },
       data: {
         name,
+        author,
         description,
         price,
         quantity,
         publishingId,
+        seriaId,
         isNew,
         isSale,
         sale,
@@ -109,39 +128,57 @@ export async function PATCH(
         size,
         titleSheet,
         video,
+        isbn,
+        titleSeo,
+        descriptionSeo,
         storeId: params.storeId,
         images: {
           deleteMany: {},
           createMany: {
-            data: images.map((image: { url: string }, index: number) => ({ url: image.url, order: index })),
+            data: images.map((image: { url: string }, index: number) => ({
+              url: image.url,
+              order: index,
+            })),
           },
         },
         ageGroups: {
           deleteMany: {},
           createMany: {
-            data: ageGroups.map((ageGroup: { value: string; label: string }) => ({
-              ageGroupId: ageGroup.value,
-              ageGroupName: ageGroup.label,
-            })),
+            data: ageGroups.map(
+              (ageGroup: { value: string; label: string }) => ({
+                ageGroupId: ageGroup.value,
+                ageGroupName: ageGroup.label,
+              })
+            ),
           },
         },
         categories: {
           deleteMany: {},
           createMany: {
-            data: categories.map((category: { value: string; label: string }) => ({
-              categoryId: category.value,
-              categoryName: category.label,
-            })),
+            data: categories.map(
+              (category: { value: string; label: string }) => ({
+                categoryId: category.value,
+                categoryName: category.label,
+              })
+            ),
           },
         },
-       
+        suggestionProducts: {
+          set: [],
+
+          connect: suggestionProducts.map(
+            (suggestionProduct: { value: string }) => ({
+              id: suggestionProduct.value,
+            })
+          ),
+        },
       },
     });
 
     return NextResponse.json(product);
   } catch (error) {
-    console.log("[PRODUCT_PATCH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.log('[PRODUCT_PATCH]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }
 
@@ -152,10 +189,10 @@ export async function DELETE(
   try {
     const { userId } = auth();
 
-    if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
+    if (!userId) return new NextResponse('Unauthenticated', { status: 401 });
 
     if (!params.productId)
-      return new NextResponse("Product ID is required", { status: 400 });
+      return new NextResponse('Product ID is required', { status: 400 });
 
     // console.log("Fetching store by user ID...");
     const storeByUserId = await prismadb.store.findFirst({
@@ -166,8 +203,19 @@ export async function DELETE(
     });
 
     if (!storeByUserId) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return new NextResponse('Unauthorized', { status: 403 });
     }
+
+    const suggestionProductsDelete = await prismadb.product.update({
+      where: {
+        id: params.productId,
+      },
+      data: {
+        suggestionProducts: {
+          set: [],
+        },
+      },
+    });
 
     // console.log("Deleting images...");
     const images = await prismadb.image.findMany({
@@ -176,19 +224,17 @@ export async function DELETE(
       },
     });
 
-
-    
-    const delImages = await Promise.all(images.map(async (image) => {
-      await fetch(`https://mouse-admin.com.ua/api/upload`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({filename:  image.url }),
-      });
-    }))
- 
-  
+    const delImages = await Promise.all(
+      images.map(async (image) => {
+        await fetch(`https://mouse-admin.com.ua/api/upload`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ filename: image.url }),
+        });
+      })
+    );
 
     // console.log("Deleting categories...");
     const categories = await prismadb.categoriesToProduct.deleteMany({
@@ -210,9 +256,30 @@ export async function DELETE(
         productId: params.productId,
       },
       data: {
-        productId: "0",
+        productId: '0',
       },
     });
+
+    // const suggestedBy = await prismadb.product.findMany({
+    //   where: {
+    //     suggestionProducts: {
+    //       some: {
+    //         id: params.productId,
+    //       },
+    //     },
+    //   },
+    // });
+
+    // for (const product of suggestedBy) {
+    //   await prismadb.product.update({
+    //     where: { id: params.productId },
+    //     data: {
+    //       suggestionProducts: {
+    //         disconnect: { id: product.id },
+    //       },
+    //     },
+    //   });
+    // }
 
     // console.log("Deleting product...");
     const product = await prismadb.product.deleteMany({
@@ -225,7 +292,7 @@ export async function DELETE(
 
     return NextResponse.json(product);
   } catch (error) {
-    console.log("[PRODUCT_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.log('[PRODUCT_DELETE]', error);
+    return new NextResponse('Internal Error', { status: 500 });
   }
 }

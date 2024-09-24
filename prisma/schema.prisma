@@ -16,17 +16,21 @@ model Store {
   cetegories     Category[]      @relation("StoreToCategory")
   ageGroups      AgeGroup[]      @relation("StoreToAgeGroup")
   publishings    Publishing[]    @relation("StoreToPublishing")
+  serias         Seria[]         @relation("StoreToSeria")
   products       Product[]       @relation("StoreToProduct")
   orders         Order[]         @relation("StoreToOrder")
   // infos       Info[]       @relation("StoreToInfo")
   sale           Int             @default(0)
   mainbillboards MainBillboard[]
+  description    String?         @db.Text
+  descriptionSeo String?         @db.Text
+  titleSeo       String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
 
 model Billboard {
-  id         String     @id @default(uuid())
+  id         String     @id @default(cuid())
   storeId    String
   store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
   label      String
@@ -39,7 +43,7 @@ model Billboard {
 }
 
 model MainBillboard {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   storeId   String
   store     Store    @relation(fields: [storeId], references: [id])
   label     String
@@ -64,81 +68,114 @@ model MainBillboard {
 // }
 
 model Category {
-  id          String                @id @default(uuid())
-  name        String
-  storeId     String
-  store       Store                 @relation("StoreToCategory", fields: [storeId], references: [id])
-  billboardId String
-  billboard   Billboard             @relation(fields: [billboardId], references: [id])
-  products    CategoriesToProduct[]
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  id             String                @id @default(cuid())
+  name           String
+  storeId        String
+  store          Store                 @relation("StoreToCategory", fields: [storeId], references: [id])
+  billboardId    String
+  billboard      Billboard             @relation(fields: [billboardId], references: [id])
+  products       CategoriesToProduct[]
+  description    String?               @db.Text
+  descriptionSeo String?               @db.Text
+  titleSeo       String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
 
   @@index([storeId])
   @@index([billboardId])
 }
 
 model AgeGroup {
-  id        String              @id @default(uuid())
-  storeId   String
-  store     Store               @relation("StoreToAgeGroup", fields: [storeId], references: [id])
-  name      String
-  value     String
-  products  AgeGroupToProduct[]
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  id             String              @id @default(cuid())
+  storeId        String
+  store          Store               @relation("StoreToAgeGroup", fields: [storeId], references: [id])
+  name           String
+  value          String
+  products       AgeGroupToProduct[]
+  description    String?             @db.Text
+  descriptionSeo String?             @db.Text
+  titleSeo       String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@index([storeId])
 }
 
 model Publishing {
-  id        String    @id @default(uuid())
-  storeId   String
-  store     Store     @relation("StoreToPublishing", fields: [storeId], references: [id])
-  name      String
-  value     String
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  storeId        String
+  store          Store     @relation("StoreToPublishing", fields: [storeId], references: [id])
+  name           String
+  value          String
+  products       Product[]
+  description    String?   @db.Text
+  descriptionSeo String?   @db.Text
+  titleSeo       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([storeId])
+}
+
+model Seria {
+  id             String    @id @default(cuid())
+  storeId        String
+  store          Store     @relation("StoreToSeria", fields: [storeId], references: [id])
+  name           String
+  value          String
+  products       Product[]
+  description    String?   @db.Text
+  descriptionSeo String?   @db.Text
+  titleSeo       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([storeId])
 }
 
 model Product {
-  id      String @id @default(uuid())
+  id      String @id @default(cuid())
   storeId String
   store   Store  @relation("StoreToProduct", fields: [storeId], references: [id])
 
-  categories    CategoriesToProduct[]
-  name          String
-  description   String                @db.Text
-  sheets        Int
-  size          String
-  titleSheet    String
-  quantity      Int
-  price         Decimal
-  isNew         Boolean               @default(false)
-  isSale        Boolean               @default(false)
-  sale          Int
-  isLowQuantity Boolean               @default(false)
-  isFeatured    Boolean               @default(false)
-  isArchived    Boolean               @default(false)
-  ageGroups     AgeGroupToProduct[]
-
-  publishingId String
-  publishing   Publishing  @relation(fields: [publishingId], references: [id])
-  images       Image[]
-  video        String      @default("")
-  orderItems   OrderItem[]
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  categories         CategoriesToProduct[]
+  name               String
+  description        String                @db.Text
+  author             String                @default("")
+  sheets             Int
+  isbn               String                @default("")
+  size               String
+  titleSheet         String
+  quantity           Int
+  price              Decimal
+  isNew              Boolean               @default(false)
+  isSale             Boolean               @default(false)
+  sale               Int
+  isLowQuantity      Boolean               @default(false)
+  isFeatured         Boolean               @default(false)
+  isArchived         Boolean               @default(false)
+  ageGroups          AgeGroupToProduct[]
+  suggestionProducts Product[]             @relation("Suggestions")
+  suggestedBy        Product[]             @relation("Suggestions")
+  seriaId            String?
+  seria              Seria?                @relation(fields: [seriaId], references: [id])
+  publishingId       String
+  publishing         Publishing            @relation(fields: [publishingId], references: [id])
+  images             Image[]
+  video              String                @default("")
+  orderItems         OrderItem[]
+  descriptionSeo     String?               @db.Text
+  titleSeo           String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
 
   @@index([storeId])
   @@index([publishingId])
+  @@index([seriaId])
 }
 
 model Image {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
@@ -174,12 +211,12 @@ model CategoriesToProduct {
 }
 
 model Order {
-  id          String      @id @default(uuid())
+  id          String      @id @default(cuid())
   storeId     String
   store       Store       @relation("StoreToOrder", fields: [storeId], references: [id])
   orderItems  OrderItem[]
   name        String
-  surname     String     @default("")
+  surname     String      @default("")
   totalPrice  Decimal     @default(0)
   orderStatus String      @default("")
   orderState  String      @default("")
@@ -192,6 +229,10 @@ model Order {
   call        Boolean     @default(false)
   post        String      @default("new-post")
   delivery    String      @default("post")
+  invoiceId   String?
+  ttnumber    String?
+  massager    String?
+  createdBy   String      @default("")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 

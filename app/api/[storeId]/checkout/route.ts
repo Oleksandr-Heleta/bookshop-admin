@@ -136,6 +136,7 @@ export async function POST(
         call,
         post,
         delivery,
+        createdBy: 'BYSITE',
         isPaid,
         totalPrice,
         storeId: params.storeId,

@@ -4,6 +4,7 @@ import {
   Category,
   Publishing,
   Image,
+  Seria,
   Product,
   AgeGroup,
   AgeGroupToProduct,
@@ -44,6 +45,7 @@ import MultipleSelector from '@/components/ui/multi-select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ImageUploading } from '@/components/image-uploading';
 import { Decimal } from '@prisma/client/runtime/library';
+import { auth } from '@clerk/nextjs';
 
 const optionSchema = z.object({
   label: z.string(),
@@ -53,11 +55,13 @@ const optionSchema = z.object({
 
 const formShema = z.object({
   name: z.string().min(1),
+  author: z.string().optional(),
   images: z.object({ url: z.string().url() }).array(),
   price: z.coerce.number().positive().min(1),
   quantity: z.coerce.number().positive().min(1),
   categories: z.array(optionSchema).min(1),
   publishingId: z.string().min(1),
+  seriaId: z.string().optional(),
   ageGroups: z.array(optionSchema).min(1),
   description: z.string().min(1),
   isNew: z.boolean().default(false).optional(),
@@ -69,7 +73,11 @@ const formShema = z.object({
   sheets: z.coerce.number().positive().min(1),
   size: z.string().min(1),
   titleSheet: z.string().min(1),
+  isbn: z.string().optional(),
+  titleSeo: z.string().optional(),
+  descriptionSeo: z.string().optional(),
   video: z.string().optional(),
+  suggestionProducts: z.array(optionSchema).optional(),
 });
 
 type ProductFormValues = z.infer<typeof formShema>;
@@ -79,17 +87,23 @@ type InitialDataType = {
   storeId: string;
   name: string;
   description: string;
+  author: string;
   sheets: number;
   size: string;
   titleSheet: string;
   quantity: number;
   video: string;
   publishingId: string;
+  seriaId: string;
   isFeatured: boolean;
   isArchived: boolean;
   isNew: boolean;
   isSale: boolean;
+  isbn: string;
+  titleSeo: string;
+  descriptionSeo: string;
   images: Image[];
+  suggestionProducts: Product[];
   ageGroups: AgeGroupToProduct[];
   categories: CategoriesToProduct[];
   price: number;
@@ -100,6 +114,8 @@ interface ProductFormProps {
   categories: Category[];
   ageGroups: AgeGroup[];
   publishings: Publishing[];
+  serias: Seria[];
+  products: Product[];
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
@@ -107,6 +123,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   categories,
   ageGroups,
   publishings,
+  products,
+  serias,
 }) => {
   const params = useParams();
   const router = useRouter();
@@ -135,11 +153,19 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 return { label: coll.categoryName, value: coll.categoryId };
               })
             : [],
+          suggestionProducts: initialData?.suggestionProducts
+            ? initialData.suggestionProducts.map((product) => ({
+                label: product.name,
+                value: product.id,
+              }))
+            : [],
         }
       : {
           name: '',
           description: '',
+          author: undefined,
           images: [],
+          suggestionProducts: [],
           quantity: 1,
           price: 0,
           isNew: false,
@@ -148,6 +174,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           isLowQuantity: false,
           categories: [],
           publishingId: '',
+          seriaId: undefined,
           ageGroups: [],
           isFeatured: false,
           isArchived: false,
@@ -155,6 +182,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           size: '',
           titleSheet: '',
           video: '',
+          isbn: '',
+          titleSeo: '',
+          descriptionSeo: '',
         },
   });
 
@@ -291,6 +321,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
             <FormField
               control={form.control}
+              name="author"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Автор</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Ім'я автора"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="price"
               render={({ field }) => (
                 <FormItem>
@@ -404,6 +451,63 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="seriaId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Серія</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Виберіть серію"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {serias.map((seria) => (
+                        <SelectItem key={seria.id} value={seria.id}>
+                          {seria.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="suggestionProducts"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Рекомендовані товари</FormLabel>
+                  <MultipleSelector
+                    hidePlaceholderWhenSelected
+                    value={field.value}
+                    disabled={loading}
+                    onChange={field.onChange}
+                    defaultOptions={products.map((product) => {
+                      return { value: product.id, label: product.name };
+                    })}
+                    placeholder="Оберіть товари які будуть рекомендовані на сторінці"
+                    emptyIndicator={
+                      <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                        no results found.
+                      </p>
+                    }
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -632,6 +736,57 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <Input
                       disabled={loading}
                       placeholder="URL відео"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isbn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ISBN</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="ISBN книги"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="titleSeo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Назва для SEO</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="SEO title"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="descriptionSeo"
+              render={({ field }) => (
+                <FormItem className="col-span-full">
+                  <FormLabel>Опис книги для SEO</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      disabled={loading}
+                      placeholder="SEO Description"
                       {...field}
                     />
                   </FormControl>

@@ -22,37 +22,38 @@ export async function GET(
     return new NextResponse('Store ID is required', { status: 400 });
   }
 
-  const products = await prismadb.product.findMany({
-    where: {
-      storeId: params.storeId,
-      isArchived: false,
-      quantity: { gt: 0 },
-    },
-    include: {
-      categories: true,
-      ageGroups: true,
-      publishing: true,
-      images: {
-        orderBy: {
-          order: 'asc',
+  try {
+    const products = await prismadb.product.findMany({
+      where: {
+        storeId: params.storeId,
+        isArchived: false,
+        quantity: { gt: 0 },
+      },
+      include: {
+        categories: true,
+        ageGroups: true,
+        publishing: true,
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
         },
       },
-    },
-  });
+    });
 
-  const ageGroups = await prismadb.ageGroup.findMany({
-    where: {
-      storeId: params.storeId,
-    },
-  });
+    const ageGroups = await prismadb.ageGroup.findMany({
+      where: {
+        storeId: params.storeId,
+      },
+    });
 
-  const categories = await prismadb.category.findMany({
-    where: {
-      storeId: params.storeId,
-    },
-  });
+    const categories = await prismadb.category.findMany({
+      where: {
+        storeId: params.storeId,
+      },
+    });
 
-  const xml = `
+    const xml = `
 <?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:g="${googleShoppingNamespace}" version="2.0">
   <channel>
@@ -72,6 +73,7 @@ export async function GET(
         <g:availability>${
           product.quantity > 0 ? 'in stock' : 'out of stock'
         }</g:availability>
+          ${product.isbn ? `<g:gtin>${product.isbn}</g:gtin>` : ''}
         <g:brand><![CDATA[${product.publishing.name}]]></g:brand>
         <g:google_product_category>![CDATA[Media > Books > Children's Books]]</g:google_product_category>
         <g:product_type><![CDATA[Books & Magazines > Books > Children's Books]]></g:product_type>
@@ -96,6 +98,11 @@ export async function GET(
               categories.find((cat) => cat.id === category.categoryId)?.name
           )
           .join(', ')}]]</g:custom_label_1>
+          ${
+            product.author
+              ? `<g:custom_label_2>![CDATA[Автор: ${product.author}]]</g:custom_label_2>`
+              : ''
+          }
       </item>
     `
       )
@@ -104,10 +111,14 @@ export async function GET(
 </rss>
   `;
 
-  const response = new NextResponse(xml.trim(), {
-    status: 200,
-    headers: corsHeaders,
-  });
-  response.headers.set('Content-Type', 'application/xml');
-  return response;
+    const response = new NextResponse(xml.trim(), {
+      status: 200,
+      headers: corsHeaders,
+    });
+    response.headers.set('Content-Type', 'application/xml');
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 }

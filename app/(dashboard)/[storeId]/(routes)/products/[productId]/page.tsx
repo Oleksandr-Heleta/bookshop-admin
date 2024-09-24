@@ -1,5 +1,5 @@
-import prismadb from "@/lib/prismadb";
-import { ProductForm } from "./components/product-form";
+import prismadb from '@/lib/prismadb';
+import { ProductForm } from './components/product-form';
 
 const ProductPage = async ({
   params,
@@ -21,6 +21,8 @@ const ProductPage = async ({
       },
       ageGroups: true,
       categories: true,
+      seria: true,
+      suggestionProducts: true,
     },
   });
 
@@ -42,7 +44,17 @@ const ProductPage = async ({
     },
   });
 
- 
+  const serias = await prismadb.seria.findMany({
+    where: {
+      storeId: params.storeId,
+    },
+  });
+
+  const products = await prismadb.product.findMany({
+    where: {
+      storeId: params.storeId,
+    },
+  });
 
   return (
     <div className="flex-col">
@@ -51,7 +63,20 @@ const ProductPage = async ({
           categories={categories}
           ageGroups={ageGroups}
           publishings={publishings}
-          initialData={product ? {...product, price: parseFloat(String(product?.price))} : null}
+          serias={serias}
+          products={products}
+          initialData={
+            product
+              ? {
+                  ...product,
+                  price: parseFloat(String(product?.price)),
+                  seriaId: product.seriaId ?? '',
+                  suggestionProducts: product.suggestionProducts ?? [],
+                  titleSeo: product.titleSeo ?? '',
+                  descriptionSeo: product.descriptionSeo ?? '',
+                }
+              : null
+          }
         />
       </div>
     </div>

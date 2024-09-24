@@ -1,6 +1,6 @@
 'use client';
 
-import { AgeGroup } from '@prisma/client';
+import { Seria } from '@prisma/client';
 import { Heading } from '@/components/ui/heading';
 import { Button } from '@/components/ui/button';
 import { Trash } from 'lucide-react';
@@ -33,31 +33,25 @@ const formShema = z.object({
   descriptionSeo: z.string().optional(),
 });
 
-interface AgeGroupFormProps {
-  initialData: AgeGroup | null;
+interface SeriaFormProps {
+  initialData: Seria | null;
 }
 
-type AgeGroupFormValues = z.infer<typeof formShema>;
+type SeriaFormValues = z.infer<typeof formShema>;
 
-export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({ initialData }) => {
+export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData
-    ? 'Редагування вікової групи'
-    : 'Створення вікової групи';
-  const description = initialData
-    ? 'Редагуйте вікову групу'
-    : 'Додайте вікову групу';
-  const toastMessage = initialData
-    ? 'Вікова група оновлена.'
-    : 'Вікова група створена.';
+  const title = initialData ? 'Редагування серії' : 'Створення серії';
+  const description = initialData ? 'Редагувати серію' : 'Додати нову серію';
+  const toastMessage = initialData ? 'серію оновлено' : 'серію створено';
   const action = initialData ? 'Зберегти зміни' : 'Створити';
 
-  const form = useForm<AgeGroupFormValues>({
+  const form = useForm<SeriaFormValues>({
     resolver: zodResolver(formShema),
     defaultValues: initialData
       ? {
@@ -75,19 +69,19 @@ export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({ initialData }) => {
         },
   });
 
-  const onSubmit = async (data: AgeGroupFormValues) => {
+  const onSubmit = async (data: SeriaFormValues) => {
     try {
       setLoading(true);
       if (initialData) {
         await axios.patch(
-          `/api/${params.storeId}/age-groups/${params.ageGroupId}`,
+          `/api/${params.storeId}/serias/${params.publishingId}`,
           data
         );
       } else {
-        await axios.post(`/api/${params.storeId}/age-groups`, data);
+        await axios.post(`/api/${params.storeId}/serias`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/age-groups`);
+      router.push(`/${params.storeId}/serias`);
       toast.success(toastMessage);
     } catch (error) {
       toast.error('Щось пішло не так!');
@@ -100,15 +94,13 @@ export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       await axios.delete(
-        `/api/${params.storeId}/age-groups/${params.ageGroupId}`
+        `/api/${params.storeId}/serias/${params.publishingId}`
       );
       router.refresh();
-      router.push(`/${params.storeId}/age-groups`);
-      toast.success('вікова група видалена.');
+      router.push(`/${params.storeId}/serias`);
+      toast.success('Серію видалено.');
     } catch (error) {
-      toast.error(
-        'Переконайтесь що всі товари даної вікової групи видалені видалені.'
-      );
+      toast.error('Переконайтесь що видалені всі товари з цієї серії.');
     } finally {
       setLoading(false);
       setOpen(false);
@@ -152,7 +144,7 @@ export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({ initialData }) => {
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Назва вікової групи"
+                      placeholder="Назва серії"
                       {...field}
                     />
                   </FormControl>
@@ -167,11 +159,13 @@ export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Значення</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Значення вікової групи"
-                      {...field}
-                    />
+                    <div className="flex items-center gap-x-4">
+                      <Input
+                        disabled={loading}
+                        placeholder="Значення серії"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -187,7 +181,7 @@ export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({ initialData }) => {
                     <Textarea
                       className="h-48"
                       disabled={loading}
-                      placeholder="Опис вікової групи"
+                      placeholder="Опис серії"
                       {...field}
                     />
                   </FormControl>
@@ -217,7 +211,7 @@ export const AgeGroupForm: React.FC<AgeGroupFormProps> = ({ initialData }) => {
               name="descriptionSeo"
               render={({ field }) => (
                 <FormItem className="col-span-full">
-                  <FormLabel>Опис вікової групи для SEO</FormLabel>
+                  <FormLabel>Опис книги для SEO</FormLabel>
                   <FormControl>
                     <Textarea
                       disabled={loading}

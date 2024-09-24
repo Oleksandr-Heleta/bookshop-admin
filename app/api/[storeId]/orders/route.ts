@@ -1,6 +1,6 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
+import prismadb from '@/lib/prismadb';
+import { auth } from '@clerk/nextjs';
+import { NextResponse } from 'next/server';
 
 export async function POST(
   req: Request,
@@ -27,35 +27,35 @@ export async function POST(
     } = body;
 
     if (!userId) {
-      return new NextResponse("Unauthenticated", { status: 401 });
+      return new NextResponse('Unauthenticated', { status: 401 });
     }
 
     if (!phone) {
-      return new NextResponse("Phone is required", { status: 400 });
+      return new NextResponse('Phone is required', { status: 400 });
     }
 
     if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
+      return new NextResponse('Name is required', { status: 400 });
     }
 
     if (!surname) {
-      return new NextResponse("Name is required", { status: 400 });
+      return new NextResponse('Name is required', { status: 400 });
     }
 
     if (!city) {
-      return new NextResponse("City is required", { status: 400 });
+      return new NextResponse('City is required', { status: 400 });
     }
 
     if (!address) {
-      return new NextResponse("Address is required", { status: 400 });
+      return new NextResponse('Address is required', { status: 400 });
     }
 
     if (!orderItems) {
-      return new NextResponse("orderItems is required", { status: 400 });
+      return new NextResponse('orderItems is required', { status: 400 });
     }
 
     if (!params.storeId) {
-      return new NextResponse("Store ID is required", { status: 400 });
+      return new NextResponse('Store ID is required', { status: 400 });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
@@ -66,13 +66,13 @@ export async function POST(
     });
 
     if (!storeByUserId) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return new NextResponse('Unauthorized', { status: 403 });
     }
 
     if (
       isPaid ||
-      orderState === "paided" ||
-      (orderState === "afterrecive" && orderStatus === "sended")
+      orderState === 'paided' ||
+      (orderState === 'afterrecive' && orderStatus === 'sended')
     ) {
       isPaid = true;
     }
@@ -89,6 +89,7 @@ export async function POST(
         call,
         post,
         delivery,
+        createdBy: 'BYHANDS',
         totalPrice,
         storeId: params.storeId,
         orderItems: {
@@ -123,8 +124,8 @@ export async function POST(
 
     return NextResponse.json(order);
   } catch (error) {
-    console.log("[ORDER_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.log('[ORDER_POST]', error);
+    return new NextResponse('Internal error', { status: 500 });
   }
 }
 
@@ -136,7 +137,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
 
     if (!params.storeId) {
-      return new NextResponse("Store ID is required", { status: 400 });
+      return new NextResponse('Store ID is required', { status: 400 });
     }
 
     const orders = await prismadb.order.findMany({
@@ -147,13 +148,13 @@ export async function GET(
         orderItems: true,
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
 
     return NextResponse.json(orders);
   } catch (error) {
-    console.log("[ORDERS_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.log('[ORDERS_GET]', error);
+    return new NextResponse('Internal error', { status: 500 });
   }
 }

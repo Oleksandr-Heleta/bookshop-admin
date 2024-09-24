@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         .split('.')
         .slice(0, -1)
         .join('.')}.webp`;
-      const filePath = path.join(process.cwd(), 'images', fileName); // change public to images folder
+      const filePath = path.join(process.cwd(), 'public', fileName); // change public to images folder
       await writeFile(filePath, webpBuffer);
       return {
         filePath,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 
 const rozetkaNamespace = 'http://rozetka.com.ua/ns/1.0';
 
@@ -134,42 +135,43 @@ export async function GET(
     return new NextResponse('Store ID is required', { status: 400 });
   }
 
-  const products = await prismadb.product.findMany({
-    where: {
-      storeId: params.storeId,
-    },
-    include: {
-      categories: true,
-      publishing: true,
-      ageGroups: {
-        orderBy: {
-          ageGroupName: 'asc',
+  try {
+    const products = await prismadb.product.findMany({
+      where: {
+        storeId: params.storeId,
+      },
+      include: {
+        categories: true,
+        publishing: true,
+        ageGroups: {
+          orderBy: {
+            ageGroupName: 'asc',
+          },
+        },
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
         },
       },
-      images: {
-        orderBy: {
-          order: 'asc',
-        },
+    });
+
+    const ageGroups = await prismadb.ageGroup.findMany({
+      where: {
+        storeId: params.storeId,
       },
-    },
-  });
+      orderBy: {
+        value: 'asc',
+      },
+    });
 
-  const ageGroups = await prismadb.ageGroup.findMany({
-    where: {
-      storeId: params.storeId,
-    },
-    orderBy: {
-      value: 'asc',
-    },
-  });
+    const categories = await prismadb.category.findMany({
+      where: {
+        storeId: params.storeId,
+      },
+    });
 
-  const categories = await prismadb.category.findMany({
-    where: {
-      storeId: params.storeId,
-    },
-  });
-
-  const xml = `
+    const xml = `
 <?xml version="1.0" encoding="UTF-8"?>
 <yml_catalog date="${format(new Date(), 'yyyy-MM-dd HH:mm')}">
 <shop>
@@ -192,16 +194,21 @@ export async function GET(
       )
       .map(
         (product) => `
-      <offer id="${product.id}" available="${product.isArchived}">
-        
+      <offer id="${product.id}" available="${!product.isArchived}">
         <categoryId>1</categoryId>
-        
         <vendor><![CDATA[${product.publishing.name}]]></vendor>
-        <name><![CDATA[${product.name}]]></name>
-        <name_ua><![CDATA[${product.name}]]></name_ua>
+       <name><![CDATA[${product.name} ${
+          product.author ? '- ' + product.author : ''
+        } ${product.isbn ? '(' + product.isbn + ')' : ''}]]></name>
+        <name_ua><![CDATA[${product.name} ${
+          product.author ? '- ' + product.author : ''
+        } ${product.isbn ? '(' + product.isbn + ')' : ''}]]></name_ua>
         <description><![CDATA[${product.description}]]></description>
         <description_ua><![CDATA[${product.description}]]></description_ua>
-        <stock_quantity>${product.quantity}</stock_quantity>
+          ${product.isbn ? `<article> ${product.isbn}</article>` : ''}
+        <stock_quantity>${
+          product.isArchived ? 0 : product.quantity
+        }</stock_quantity>
         <url>${process.env.FRONTEND_STORE_URL}/product/${product.id}</url>
         <state>new</state>
         <price>${product.price}</price>
@@ -265,14 +272,21 @@ export async function GET(
          )
          .map(
            (product) => `
-      <offer id="${product.id}" available="${product.isArchived}">
+      <offer id="${product.id}" available="${!product.isArchived}">
         <categoryId>2</categoryId>
         <vendor><![CDATA[${product.publishing.name}]]></vendor>
-        <name><![CDATA[${product.name}]]></name>
-        <name_ua><![CDATA[${product.name}]]></name_ua>
+        <name><![CDATA[${product.name} ${
+             product.author ? '- ' + product.author : ''
+           } ${product.isbn ? '(' + product.isbn + ')' : ''}]]></name>
+        <name_ua><![CDATA[${product.name} ${
+             product.author ? '- ' + product.author : ''
+           } ${product.isbn ? '(' + product.isbn + ')' : ''}]]></name_ua>
         <description><![CDATA[${product.description}]]></description>
         <description_ua><![CDATA[${product.description}]]></description_ua>
-        <stock_quantity>${product.quantity}</stock_quantity>
+        ${product.isbn ? `<article> ${product.isbn}</article>` : ''}
+        <stock_quantity>${
+          product.isArchived ? 0 : product.quantity
+        }</stock_quantity>
         <url>${process.env.FRONTEND_STORE_URL}/product/${product.id}</url>
         <state>new</state>
         <price>${product.price}</price>
@@ -301,10 +315,14 @@ export async function GET(
 </yml_catalog>
   `;
 
-  const response = new NextResponse(xml.trim(), {
-    status: 200,
-    headers: corsHeaders,
-  });
-  response.headers.set('Content-Type', 'application/xml');
-  return response;
+    const response = new NextResponse(xml.trim(), {
+      status: 200,
+      headers: corsHeaders,
+    });
+    response.headers.set('Content-Type', 'application/xml');
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 }

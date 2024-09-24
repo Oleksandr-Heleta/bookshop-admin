@@ -1,81 +1,83 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
+import prismadb from '@/lib/prismadb';
+import { auth } from '@clerk/nextjs';
+import { NextResponse } from 'next/server';
 
 export async function POST(
-    req: Request,
-     {params} : {params: {storeId: string}}
-     ) {
+  req: Request,
+  { params }: { params: { storeId: string } }
+) {
   try {
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, value } = body;
+    const { name, value, description, descriptionSeo, titleSeo } = body;
 
     if (!userId) {
-      return new NextResponse("Unauthenticated", { status: 401 });
+      return new NextResponse('Unauthenticated', { status: 401 });
     }
 
-    if(!name){
-        return new NextResponse("Name is required", { status: 400 });
+    if (!name) {
+      return new NextResponse('Name is required', { status: 400 });
     }
 
-    if(!value){
-        return new NextResponse("Value is required", { status: 400 });
+    if (!value) {
+      return new NextResponse('Value is required', { status: 400 });
     }
 
-    if(!params.storeId){
-        return new NextResponse("Store ID is required", { status: 400 });
+    if (!params.storeId) {
+      return new NextResponse('Store ID is required', { status: 400 });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
-        where:{
-            id: params.storeId,
-            userId
-        }
+      where: {
+        id: params.storeId,
+        userId,
+      },
     });
 
     if (!storeByUserId) {
-        return new NextResponse("Unauthorized", { status: 403 });
-      }
+      return new NextResponse('Unauthorized', { status: 403 });
+    }
 
     const ageGroup = await prismadb.ageGroup.create({
-        data:{
-            name,
-            value,
-            storeId: params.storeId
-        }
+      data: {
+        name,
+        value,
+        storeId: params.storeId,
+        description,
+        descriptionSeo,
+        titleSeo,
+      },
     });
 
     return NextResponse.json(ageGroup);
   } catch (error) {
-    console.log("[ageGroup_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.log('[ageGroup_POST]', error);
+    return new NextResponse('Internal error', { status: 500 });
   }
 }
 
 export async function GET(
-    req: Request,
-     {params} : {params: {storeId: string}}
-     ) {
+  req: Request,
+  { params }: { params: { storeId: string } }
+) {
   try {
-    
-    if(!params.storeId){
-        return new NextResponse("Store ID is required", { status: 400 });
+    if (!params.storeId) {
+      return new NextResponse('Store ID is required', { status: 400 });
     }
 
     const ageGroup = await prismadb.ageGroup.findMany({
-        where:{
-            storeId: params.storeId
-        },
-        orderBy: {
-          value: "asc",
-        },
+      where: {
+        storeId: params.storeId,
+      },
+      orderBy: {
+        value: 'asc',
+      },
     });
 
     return NextResponse.json(ageGroup);
   } catch (error) {
-    console.log("[ageGroup_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.log('[ageGroup_GET]', error);
+    return new NextResponse('Internal error', { status: 500 });
   }
 }
