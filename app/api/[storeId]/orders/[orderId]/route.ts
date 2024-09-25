@@ -25,6 +25,17 @@ export async function GET(
       where: {
         id: params.orderId,
       },
+      include: {
+        orderItems: {
+          include: {
+            product: {
+              include: {
+                images: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({ order }, { headers: corsHeaders }); //

@@ -22,7 +22,15 @@ export async function GET(
           },
         },
         categories: {},
-        suggestionProducts: {},
+        suggestionProducts: {
+          include: {
+            images: {
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
+        },
         seria: {},
         publishing: {},
         ageGroups: {

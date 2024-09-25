@@ -167,6 +167,7 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(req.url);
+
     // console.log(searchParams);
     const categoryId = searchParams.get('categoryId') || undefined;
     const ageGroupId = searchParams.get('ageGroupId') || undefined;
@@ -177,7 +178,7 @@ export async function GET(
     const isNew = searchParams.get('isNew') || undefined;
     const maxPrice = searchParams.get('maxPrice') || undefined;
     const minPrice = searchParams.get('minPrice') || undefined;
-    const seriaId = searchParams.get('seria') || undefined;
+    const seriaId = searchParams.get('seriaId') || undefined;
 
     if (!params.storeId) {
       return new NextResponse('Store ID is required', { status: 400 });
