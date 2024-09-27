@@ -30,13 +30,19 @@ export async function GET(
           include: {
             product: {
               include: {
-                images: true,
+                images: {
+                  orderBy: {
+                    order: 'asc',
+                  },
+                },
               },
             },
           },
         },
       },
     });
+
+    // console.log(order);
 
     return NextResponse.json({ order }, { headers: corsHeaders }); //
   } catch (error) {

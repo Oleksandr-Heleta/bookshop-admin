@@ -40,6 +40,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue> & { page: number; pageSize: number }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,6 +56,7 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
       sorting,
+      globalFilter,
       pagination: {
         pageIndex: page - 1,
         pageSize,
@@ -82,15 +84,17 @@ export function DataTable<TData, TValue>({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setGlobalFilter(event.target.value);
+  };
+
   return (
     <div>
       <div className="flex items-center py-4">
         <Input
           placeholder="Пошук"
-          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn(searchKey)?.setFilterValue(event.target.value)
-          }
+          value={globalFilter}
+          onChange={handleSearchChange}
           className="max-w-sm"
         />
       </div>

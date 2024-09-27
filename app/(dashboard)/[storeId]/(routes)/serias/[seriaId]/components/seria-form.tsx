@@ -26,6 +26,7 @@ import { AlertModal } from '@/components/modals/alert-modal';
 import ImageUpload from '@/components/ui/image-upload';
 
 const formShema = z.object({
+  id: z.string().min(5),
   name: z.string().min(1),
   value: z.string().min(1),
   description: z.string().optional(),
@@ -61,6 +62,7 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
           descriptionSeo: initialData.descriptionSeo || undefined,
         }
       : {
+          id: '',
           name: '',
           value: '',
           description: undefined,
@@ -145,6 +147,23 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
                     <Input
                       disabled={loading}
                       placeholder="Назва серії"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ID серії</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Введіть новий ID"
                       {...field}
                     />
                   </FormControl>

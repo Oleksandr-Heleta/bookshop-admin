@@ -1,6 +1,7 @@
 import prismadb from '@/lib/prismadb';
 import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
+import { generateUniqueId } from '@/lib/utils';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': `${process.env.FRONTEND_STORE_URL}`,
@@ -87,8 +88,11 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 403 });
     }
 
+    const id = await generateUniqueId('product');
+
     const product = await prismadb.product.create({
       data: {
+        id,
         name,
         author,
         description,

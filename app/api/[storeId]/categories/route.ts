@@ -10,7 +10,8 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, billboardId, description, descriptionSeo, titleSeo } = body;
+    const { id, name, billboardId, description, descriptionSeo, titleSeo } =
+      body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -39,8 +40,19 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 403 });
     }
 
+    const categoryId = await prismadb.category.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (categoryId) {
+      return new NextResponse('ID is exist', { status: 400 });
+    }
+
     const category = await prismadb.category.create({
       data: {
+        id,
         name,
         billboardId,
         storeId: params.storeId,

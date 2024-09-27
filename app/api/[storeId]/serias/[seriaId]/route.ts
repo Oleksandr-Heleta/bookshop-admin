@@ -31,7 +31,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, value, description, descriptionSeo, titleSeo } = body;
+    const { id, name, value, description, descriptionSeo, titleSeo } = body;
 
     if (!userId) return new NextResponse('Unauthenticated', { status: 401 });
     if (!name) return new NextResponse('Name is required', { status: 400 });
@@ -50,11 +50,24 @@ export async function PATCH(
       return new NextResponse('Unauthorized', { status: 403 });
     }
 
+    if (id !== params.seriaId) {
+      const seriaId = await prismadb.seria.findFirst({
+        where: {
+          id,
+        },
+      });
+
+      if (seriaId) {
+        return new NextResponse('ID is exist', { status: 400 });
+      }
+    }
+
     const seria = await prismadb.seria.updateMany({
       where: {
         id: params.seriaId,
       },
       data: {
+        id,
         name,
         value,
         description,

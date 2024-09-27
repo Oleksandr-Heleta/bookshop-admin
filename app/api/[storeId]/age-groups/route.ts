@@ -10,7 +10,7 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, value, description, descriptionSeo, titleSeo } = body;
+    const { id, name, value, description, descriptionSeo, titleSeo } = body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -39,8 +39,19 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 403 });
     }
 
+    const ageGroupId = await prismadb.ageGroup.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (ageGroupId) {
+      return new NextResponse('ID is exist', { status: 400 });
+    }
+
     const ageGroup = await prismadb.ageGroup.create({
       data: {
+        id,
         name,
         value,
         storeId: params.storeId,

@@ -1,6 +1,7 @@
 import prismadb from '@/lib/prismadb';
 import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
+import { generateUniqueId } from '@/lib/utils';
 
 export async function POST(
   req: Request,
@@ -76,8 +77,12 @@ export async function POST(
     ) {
       isPaid = true;
     }
+
+    const id = await generateUniqueId('order');
+
     const order = await prismadb.order.create({
       data: {
+        id,
         name,
         surname,
         phone,

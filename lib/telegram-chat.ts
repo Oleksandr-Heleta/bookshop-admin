@@ -1,37 +1,35 @@
 const Api = 'https://api.telegram.org/bot';
 
 interface sendMessageProps {
-    name: string;
-    surname: string;
-    phone: number;
-    totalPrice: number; 
-    call: boolean;
-    payment: string;
-    orderItems: {
-        product: {name: string;
+  name: string;
+  surname: string;
+  phone: number;
+  totalPrice: number;
+  call: boolean;
+  payment: string;
+  orderItems: {
+    product: { name: string };
+    quantity: number;
+  }[];
+}
 
-        };
-        quantity: number;
-       
-        }[];
-    }
-
-
-export const sendMessage = async ( order : sendMessageProps) => {
-
-    const text = `
+export const sendMessage = async (order: sendMessageProps) => {
+  const text = `
         Нове замовлення
         Від ${order.name} ${order.surname}
         телефон: ${order.phone}
-        Замовлені книги: ${order.orderItems.map((item) => `
+        Замовлені книги: ${order.orderItems.map(
+          (item) => `
         ${item.product.name} - ${item.quantity} шт. 
-        `)}
+        `
+        )}
         Загальною сумою на: ${order.totalPrice} грн
+        Оплата: ${order.payment}
         ${order.call ? 'Передзвонити клієнту' : 'Не передзвонювати'}
         ${order.payment === 'byIBAN' ? 'Надіслати реквізити' : ''}
     `;
 
-    // console.log(text);
+  // console.log(text);
 
   const url = `${Api}${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
   // console.log(url);
@@ -45,5 +43,4 @@ export const sendMessage = async ( order : sendMessageProps) => {
   } catch (error) {
     console.error('Error while sending message to Telegram', error);
   }
- 
 };

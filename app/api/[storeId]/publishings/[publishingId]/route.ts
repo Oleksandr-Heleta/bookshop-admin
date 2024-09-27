@@ -31,7 +31,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, value, description, descriptionSeo, titleSeo } = body;
+    const { id, name, value, description, descriptionSeo, titleSeo } = body;
 
     if (!userId) return new NextResponse('Unauthenticated', { status: 401 });
     if (!name) return new NextResponse('Name is required', { status: 400 });
@@ -50,11 +50,24 @@ export async function PATCH(
       return new NextResponse('Unauthorized', { status: 403 });
     }
 
+    if (id !== params.publishingId) {
+      const publishingId = await prismadb.ageGroup.findFirst({
+        where: {
+          id,
+        },
+      });
+
+      if (publishingId) {
+        return new NextResponse('ID is exist', { status: 400 });
+      }
+    }
+
     const publishing = await prismadb.publishing.updateMany({
       where: {
         id: params.publishingId,
       },
       data: {
+        id,
         name,
         value,
         description,

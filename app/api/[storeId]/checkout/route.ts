@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
 import { sendMessage } from '@/lib/telegram-chat';
 import { OrderItem, Product, Image } from '@prisma/client';
+import { generateUniqueId } from '@/lib/utils';
 
 interface ProductWithImages extends Product {
   images: Image[];
@@ -122,8 +123,12 @@ export async function POST(
     if (isPaid || (payment === 'afterrecive' && orderStatus === 'sended')) {
       isPaid = true;
     }
+
+    const id = await generateUniqueId('order');
+
     const order = await prismadb.order.create({
       data: {
+        id,
         name,
         surname,
         phone,
@@ -190,7 +195,7 @@ export async function POST(
       payment,
     });
 
-    let linkUrl = `${process.env.FRONTEND_STORE_URL}/cart?orderId=${order.id}`;
+    let linkUrl = `${process.env.FRONTEND_STORE_URL}/order-confirm?orderId=${order.id}`;
 
     if (payment === 'online') {
       if (!process.env.MONOBANK_API_TOKEN) {
@@ -246,7 +251,7 @@ export async function POST(
               customerEmails: ['peterone051@gmail.com'],
               basketOrder: bascetOrder,
             },
-            redirectUrl: `${process.env.FRONTEND_STORE_URL}/cart?orderId=${order.id}`,
+            redirectUrl: `${process.env.FRONTEND_STORE_URL}/order-confirm?orderId=${order.id}`,
             webhookUrl: `${process.env.NEXT_PUBLIC_API_URL}/webhook`,
           }),
         }

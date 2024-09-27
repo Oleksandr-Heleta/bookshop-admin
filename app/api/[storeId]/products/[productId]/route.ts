@@ -3,6 +3,8 @@ import { auth } from '@clerk/nextjs';
 import { de } from 'date-fns/locale';
 import { NextResponse } from 'next/server';
 
+import { generateUniqueId } from '@/lib/utils';
+
 export async function GET(
   req: Request,
   { params }: { params: { productId: string } }
@@ -88,8 +90,8 @@ export async function PATCH(
     if (!images || !images.length)
       return new NextResponse('Images are required', { status: 400 });
     if (!price) return new NextResponse('Price is required', { status: 400 });
-    if (!quantity)
-      return new NextResponse('Quantity is required', { status: 400 });
+    // if (!quantity)
+    //   return new NextResponse('Quantity is required', { status: 400 });
     if (!categories.length)
       return new NextResponse('Categories is required', { status: 400 });
     if (!ageGroups.length)
@@ -114,11 +116,14 @@ export async function PATCH(
       isArchived = true;
     }
 
+    const id = await generateUniqueId('product');
+
     const product = await prismadb.product.update({
       where: {
         id: params.productId,
       },
       data: {
+        id,
         name,
         author,
         description,

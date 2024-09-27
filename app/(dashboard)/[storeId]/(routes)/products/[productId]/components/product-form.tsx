@@ -58,7 +58,7 @@ const formShema = z.object({
   author: z.string().optional(),
   images: z.object({ url: z.string().url() }).array(),
   price: z.coerce.number().positive().min(1),
-  quantity: z.coerce.number().positive().min(1),
+  quantity: z.coerce.number().min(0),
   categories: z.array(optionSchema).min(1),
   publishingId: z.string().min(1),
   seriaId: z.string().optional(),
@@ -166,7 +166,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           author: undefined,
           images: [],
           suggestionProducts: [],
-          quantity: 1,
+          quantity: 0,
           price: 0,
           isNew: false,
           isSale: false,
@@ -344,6 +344,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormLabel>Ціна</FormLabel>
                   <FormControl>
                     <Input
+                      min="0"
                       type="number"
                       disabled={loading}
                       placeholder="9.99"
@@ -362,6 +363,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormLabel>Кількість</FormLabel>
                   <FormControl>
                     <Input
+                      min="0"
                       type="number"
                       disabled={loading}
                       placeholder="1"
@@ -520,6 +522,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormLabel>Кількість сторінок</FormLabel>
                   <FormControl>
                     <Input
+                      min="0"
                       type="number"
                       disabled={loading}
                       placeholder="1"
@@ -656,6 +659,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     <FormLabel>Відсоток знижки</FormLabel>
                     <FormControl>
                       <Input
+                        min="0"
                         type="number"
                         disabled={loading}
                         placeholder="0"

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { Billboard, MainBillboard, Store } from "@prisma/client";
-import { Heading } from "@/components/ui/heading";
-import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import * as z from "zod";
-import { set, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { Billboard, MainBillboard, Store } from '@prisma/client';
+import { Heading } from '@/components/ui/heading';
+import { Button } from '@/components/ui/button';
+import { Trash } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import * as z from 'zod';
+import { set, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import {
   Form,
   FormControl,
@@ -16,15 +16,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import toast from "react-hot-toast";
-import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
-import { AlertModal } from "@/components/modals/alert-modal";
-import { ApiAlert } from "@/components/ui/api-alert";
-import { useOrigin } from "@/hooks/use-origin";
-import  MultipleSelector  from "@/components/ui/multi-select";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { useParams, useRouter } from 'next/navigation';
+import { AlertModal } from '@/components/modals/alert-modal';
+import { ApiAlert } from '@/components/ui/api-alert';
+import { useOrigin } from '@/hooks/use-origin';
+import MultipleSelector from '@/components/ui/multi-select';
 
 interface SettingsFormProps {
   initialData: Store;
@@ -40,13 +41,20 @@ const optionSchema = z.object({
 
 const formShema = z.object({
   name: z.string().min(1),
-  mainbillboards:  z.array(optionSchema).min(1),
+  mainbillboards: z.array(optionSchema).min(1),
   sale: z.number().min(0).max(100),
+  description: z.string().optional(),
+  titleSeo: z.string().optional(),
+  descriptionSeo: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof formShema>;
 
-export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData, billboards, mainbillboards }) => {
+export const SettingsForm: React.FC<SettingsFormProps> = ({
+  initialData,
+  billboards,
+  mainbillboards,
+}) => {
   const params = useParams();
   const router = useRouter();
   const origin = useOrigin();
@@ -59,10 +67,11 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData, billboa
     defaultValues: {
       ...initialData,
       mainbillboards: mainbillboards,
+      description: initialData.description || undefined,
+      titleSeo: initialData.titleSeo || undefined,
+      descriptionSeo: initialData.descriptionSeo || undefined,
     },
   });
-
-
 
   const onSubmit = async (data: SettingsFormValues) => {
     try {
@@ -70,9 +79,9 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData, billboa
       console.log(data);
       await axios.patch(`/api/stores/${params.storeId}`, data);
       router.refresh();
-      toast.success("Магазин успішно оновлено!");
+      toast.success('Магазин успішно оновлено!');
     } catch (error) {
-      toast.error("Щось пішло не так!");
+      toast.error('Щось пішло не так!');
     } finally {
       setLoading(false);
     }
@@ -83,10 +92,10 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData, billboa
       setLoading(true);
       await axios.delete(`/api/stores/${params.storeId}`);
       router.refresh();
-      router.push("/");
-      toast.success("Магазин видалено.");
+      router.push('/');
+      toast.success('Магазин видалено.');
     } catch (error) {
-      toast.error("Переконайтесь що всі категорії видалені.");
+      toast.error('Переконайтесь що всі категорії видалені.');
     } finally {
       setLoading(false);
       setOpen(false);
@@ -136,7 +145,7 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData, billboa
                 </FormItem>
               )}
             />
-             <FormField
+            <FormField
               control={form.control}
               name="mainbillboards"
               render={({ field }) => (
@@ -161,35 +170,89 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData, billboa
                 </FormItem>
               )}
             />
-             <FormField
-                control={form.control}
-                name="sale"
-                render={({ field }) => (
-                  <FormItem className="space-x-3 space-y-0 p-4">
-                    <FormLabel>Відсоток знижки</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        disabled={loading}
-                        placeholder="0"
-                        {...field}
-                        onChange={(e) => {
-                          // Перетворення рядка в число
-                          const value = e.target.value === "" ? "" : Number(e.target.value);
-                          field.onChange(value); // Виклик onChange з перетвореним значенням
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="sale"
+              render={({ field }) => (
+                <FormItem className="space-x-3 space-y-0 p-4">
+                  <FormLabel>Відсоток знижки</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      placeholder="0"
+                      {...field}
+                      onChange={(e) => {
+                        // Перетворення рядка в число
+                        const value =
+                          e.target.value === '' ? '' : Number(e.target.value);
+                        field.onChange(value); // Виклик onChange з перетвореним значенням
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="col-span-full">
+                  <FormLabel>Опис</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      className="h-48"
+                      disabled={loading}
+                      placeholder="Опис магазину"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />{' '}
+            <FormField
+              control={form.control}
+              name="titleSeo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Назва для SEO</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="SEO title"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="descriptionSeo"
+              render={({ field }) => (
+                <FormItem className="col-span-full">
+                  <FormLabel>Опис магазину для SEO</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      disabled={loading}
+                      placeholder="SEO Description"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <Button disabled={loading} className="ml-auto" type="submit">
             Зберегти зміни
           </Button>
         </form>
       </Form>
+
       <Separator />
       <ApiAlert
         title="NEXT_PUBLIC_API_URL"

@@ -30,8 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { id } from 'date-fns/locale';
 
 const formShema = z.object({
+  id: z.string().min(5),
   name: z.string().min(1),
   billboardId: z.string().min(1),
   description: z.string().optional(),
@@ -75,6 +77,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
           descriptionSeo: initialData.descriptionSeo || undefined,
         }
       : {
+          id: '',
           name: '',
           billboardId: '',
           description: undefined,
@@ -159,6 +162,23 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                     <Input
                       disabled={loading}
                       placeholder="Назва категорії"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ID Категорії</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Введіть новий ID"
                       {...field}
                     />
                   </FormControl>
