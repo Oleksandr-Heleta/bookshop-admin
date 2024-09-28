@@ -35,7 +35,7 @@ export const ProductClient: React.FC<ProductClientProps> = ({ data }) => {
   useEffect(() => {
     paginate(data, page, pageSize);
     const previousUrl = document.referrer;
-    console.log(previousUrl, page, pageSize);
+    // console.log(previousUrl, page, pageSize);
     if (previousUrl) {
       localStorage.setItem('previousUrl', previousUrl);
     }

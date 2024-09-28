@@ -116,14 +116,11 @@ export async function PATCH(
       isArchived = true;
     }
 
-    const id = await generateUniqueId('product');
-
     const product = await prismadb.product.update({
       where: {
         id: params.productId,
       },
       data: {
-        id,
         name,
         author,
         description,
