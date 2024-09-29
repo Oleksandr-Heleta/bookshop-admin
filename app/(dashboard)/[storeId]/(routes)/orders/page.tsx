@@ -31,6 +31,7 @@ const formattedOrders : OrderColumn[] = orders.map((item) => ({
     name: item.name,
     surname: item.surname,
     phone: item.phone,
+    call: item.call,
     city: item.city,
     address: item.address,
     products: item.orderItems?.map((orderItem) => orderItem.product ? `${orderItem.product.name} - ${orderItem.quantity}` : 'Товар видалено'),
@@ -38,7 +39,9 @@ const formattedOrders : OrderColumn[] = orders.map((item) => ({
     orderStatus: item.orderStatus,
     orderState: item.orderState, 
     isPaid: item.isPaid,
-    createdAt: format(item.createdAt, "MMMM do, yyyy"),
+    post: item.post,
+    delivery: item.delivery,
+    createdAt: format(item.createdAt, "do MMMM , yyyy"),
 }));
   
    
