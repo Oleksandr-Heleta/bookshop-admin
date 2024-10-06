@@ -7,29 +7,29 @@ const rozetkaNamespace = 'http://rozetka.com.ua/ns/1.0';
 
 const ages = [
   {
-    id: '96626225-5f37-4e39-8809-019b498196a7',
+    id: 'z0do2',
     name: '0 місяців, 1 місяць, 2 місяці, 3 місяці, 4 місяці, 5 місяців, 6 місяців, 7 місяців, 8 місяців, 9 місяців, 10 місяців, 11 місяців, 1 рік, 14 місяців, 15 місяців, 16 місяців, 1.5 року, 2 роки',
     value:
       '1416448, 1416456, 1416464, 1416472, 1416480, 1416488, 1416496, 1416504, 1416512, 1416520, 1416528, 1416536, 1416544, 1416552, 1416560, 4284847, 3331309, 4284850',
   },
   {
-    id: '73fedaf5-61c2-446c-ab4d-05267e6e04b7',
+    id: 'z2do4',
     name: '2 роки, 2.5 роки, 3 роки, 3.5 роки, 4 роки',
     value: '1416560, 1475096, 1416568, 1475120, 1416576',
   },
 
   {
-    id: '468ea9fb-cdbc-4c50-9913-d8171ad3ff21',
+    id: 'z4do6',
     name: '4 роки, 5 років, 6 років',
     value: '1416576, 1416584, 1416592',
   },
   {
-    id: '3f34327c-df5b-462f-865e-8effc4e60328',
+    id: 'z6do9',
     name: '6 років, 7 років, 8 років, 9 років',
     value: '1416592, 1416600, 1416608, 1416616',
   },
   {
-    id: '4ffa0424-c715-443f-9a9f-ca27c7e96097',
+    id: 'z9do12',
     name: '9 років, 10 років, 11 років, 12 років',
     value: '1416616, 1416624, 1416632, 1416640',
   },
@@ -37,32 +37,32 @@ const ages = [
 
 const categoriesRz = [
   {
-    id: '81a246e3-d733-4f43-ae4a-3a4f1bebfcc6',
+    id: 'wimmelbook',
     name: 'Вімельбухи',
     value: '1183175',
   },
   {
-    id: '74eb3af2-17b5-47b7-b945-76a3da86d3de',
+    id: 'encyclopedias',
     name: 'Енциклопедії, Пізнавальні та розвивальні книги',
     value: '2226814, 360309',
   },
   {
-    id: 'a555dbc2-ca23-4b21-ac39-56397711b251',
+    id: 'poems',
     name: 'Поезія',
     value: '512894',
   },
   {
-    id: '4465928e-f9d2-49f8-ac8e-4c9cb3d1e12f',
+    id: 'books_with_windows',
     name: 'Інтерактивні книжки та ручки',
     value: '783330',
   },
   {
-    id: '862d7e4e-d0e4-49e2-9bf6-3e49c637d747',
+    id: 'encyclopedias',
     name: 'Пізнавальні та розвивальні книги',
     value: '360309',
   },
   {
-    id: '321a26c8-f575-43c1-a3d7-8f5a121a5245',
+    id: 'alphabets',
     name: 'Пізнавальні та розвивальні книги',
     value: '360309',
   },
@@ -189,7 +189,7 @@ export async function GET(
       .filter(
         (product) =>
           !product.categories.find(
-            (cat) => cat.categoryId == '7175b649-5b31-4e97-8ca3-92766d2550bd'
+            (cat) => cat.categoryId == 'parents'
           )
       )
       .map(
@@ -267,7 +267,7 @@ export async function GET(
          .filter(
            (product) =>
              !!product.categories.find(
-               (cat) => cat.categoryId == '7175b649-5b31-4e97-8ca3-92766d2550bd'
+               (cat) => cat.categoryId == 'parents'
              )
          )
          .map(

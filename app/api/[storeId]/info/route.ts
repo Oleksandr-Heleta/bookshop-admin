@@ -32,6 +32,9 @@ export async function GET(
           id: true,
           name: true,
           sale: true,
+          description: true,
+          titleSeo: true,
+          descriptionSeo: true,
         },
       });
 
@@ -48,6 +51,9 @@ export async function GET(
         id: store?.id,
         name: store?.name,
         sale: store?.sale,
+        description: store?.description,
+        titleSeo: store?.titleSeo,
+        descriptionSeo: store?.descriptionSeo,
         mainbillboards: mainbillboards
        }
 
