@@ -57,7 +57,7 @@ const categoriesRz = [
     value: '783330',
   },
   {
-    id: 'encyclopedias',
+    id: 'study_books',
     name: 'Пізнавальні та розвивальні книги',
     value: '360309',
   },
