@@ -94,6 +94,7 @@ const MobileNav = () => {
             Меню
           </div>
           <Button
+          aria-label='Відкрити Меню'
             onClick={toggleMenu}
             className="absolute top-2 right-2 text-white"
           >
