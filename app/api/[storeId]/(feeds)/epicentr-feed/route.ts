@@ -78,7 +78,7 @@ export async function GET(
 
     const xml = `
 <?xml version="1.0" encoding="UTF-8"?>
-date="${format(new Date(), 'yyyy-MM-dd HH:mm')}"
+<yml_catalog date="${format(new Date(), 'yyyy-MM-dd HH:mm')}">
 <offers>
  ${products .map(
         (product) => `
@@ -90,10 +90,10 @@ date="${format(new Date(), 'yyyy-MM-dd HH:mm')}"
           .map((image) => `<picture>${image.url}</picture>`)
           .join('')}
 <name lang="ru"><![CDATA[[Книга ${
-          product.author ? product.author : product.publishing?.name
+          product.author ? product.author : ''
         } «${product.name}» ${product.isbn ? '(' + product.isbn + ')' : ''}]]></name>
 <name lang="ua"><![CDATA[Книга ${
-          product.author ? product.author : product.publishing?.name
+          product.author ? product.author : ''
         } «${product.name}» ${product.isbn ? '(' + product.isbn + ')' : ''}]]></name>
 <description lang="ru"><![CDATA[${product.description}]]></description>
 
@@ -103,25 +103,26 @@ date="${format(new Date(), 'yyyy-MM-dd HH:mm')}"
 <param paramcode="country_of_origin" name="Країна-виробник" valuecode="ukr">Україна</param>
 <param paramcode="2031" name="Мова" valuecode="3558e8c28b0ebb9794a1d7c3ec0cf397">українська</param>
 <param paramcode="ratio" name="Мінімальна кратність товару"><![CDATA[1]]></param>
+<param paramcode="11257" name="Вікова аудиторія" >
+  <param paramcode="2037" name="Вікові рекомендації" valuecode="c51fd2d637b573a6ee6b04df96668321" >0+</param>
+</param>
+<param paramcode="2021" name="Рік видання" valuecode="2023" >2023</param>
+<param paramcode="2022" name="Автор" valuecode="">${product.author}</param>
+<param paramcode="2032" name="Наявність ілюстрацій" valuecode="b74855d7fc8864d1ac9c16fd0ba3c91c">кольорові сторінки</param>
+<param paramcode="2036" name="Жанр" valuecode="685vpgwex7eynplw,xbfooii9zk82lmh5">Дошкільне навчання, Дитяча проза</param>
+<param paramcode="measure" name="Одиниця виміру та кількість" valuecode="measure_pcs">шт.</param>
+<param paramcode="2026" name="ISBN" >${product.isbn}</param>
+<param paramcode="2027" name="Кількість сторінок" >${product.sheets}</param>
+${product.titleSheet == "Solid" ? `<param paramcode="2028" name="Палітурка" valuecode="72cc35e5c6fa8cb72e84e98537ea8514" >тверда</param>` : `<param paramcode="2028" name="Палітурка" valuecode="72cc35e5c6fa8cb72e84e98537ea8514" ><![CDATA[м'яка]]></param>`}
+<param paramcode="2030" name="Видавництво" valuecode=" " >${product.publishing.name}</param>
+<param paramcode="2469" name="Стать"  valuecode="59474de517e96,59474de517f3e" >для дівчаток, для хлопчиків</param>
+<param paramcode="brand" name="Бренд" valuecode=" " >${product.publishing.name}</param>
 
-<param paramcode="13183" name="Розмір" valuecode="d7c3d344fd844ca187739e4f6a4d5baa">15x30</param>
-<param paramcode="11887" name="Полотно" valuecode="c5380bbfa7fca64b5496a10bfde38b3a">поліестер</param>
-
-<param paramcode="measure" name="Міра виміру" valuecode="measure_pcs">шт.</param>
-
-
-
-<param paramcode="9875" name="Рівень складності" valuecode="b15bfd532157cfd62c9ba04987760e9c">середній</param>
-<param paramcode="3176" name="Тематика" valuecode="bsz6btxa,wle9vq5zsirz1dni">тварини, коти</param>
-<param lang="ru" paramcode="767" name="Комплектация"><![CDATA[Холст на подрамнике, краски, кисти.]]></param>
-<param lang="ua" paramcode="767" name="Комплектація"><![CDATA[Полотно на підрамнику, пензлі, фарби.]]></param>
-<param paramcode="country_of_origin" name="Країна-виробник" valuecode="chn" >Китай</param>
-<param paramcode="brand" name="Бренд" valuecode="cz1445500250k5a9">Ідейка</param>
 <param paramcode="width" name="Ширина"><![CDATA[10]]></param>
 <param paramcode="height" name="Висота"><![CDATA[20]]></param>
-<param paramcode="length" name="Глибина"><![CDATA[30]]></param>
-<param paramcode="weight" name="Вага"><![CDATA[1000]]></param>
-<param paramcode="barcodes" name="Штрих код"><![CDATA[4826664899]]></param>
+<param paramcode="length" name="Глибина"><![CDATA[3]]></param>
+<param paramcode="weight" name="Вага"><![CDATA[100]]></param>
+
 </offer>`
       )
       .join('')}

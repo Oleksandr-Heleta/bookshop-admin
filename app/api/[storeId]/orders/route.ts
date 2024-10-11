@@ -16,7 +16,9 @@ export async function POST(
       surname,
       phone,
       city,
+      cityId,
       address,
+      addressId,
       orderItems,
       orderState,
       orderStatus,
@@ -72,7 +74,6 @@ export async function POST(
 
     if (
       isPaid ||
-      orderState === 'paided' ||
       (orderState === 'afterrecive' && orderStatus === 'sended')
     ) {
       isPaid = true;
@@ -87,7 +88,9 @@ export async function POST(
         surname,
         phone,
         city,
+        cityId,
         address,
+        addressId,
         orderStatus,
         orderState,
         isPaid,

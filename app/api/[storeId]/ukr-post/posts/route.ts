@@ -30,6 +30,7 @@ const getPostOffices = async (cityId: string, postindex: string) => {
   }
 
   const data = await response.json();
+  // console.log(data);
   return data.Entries.Entry;
 };
 
@@ -41,7 +42,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const cityId = searchParams.get('city_id') || undefined;
     const postindex = searchParams.get('postindex') || undefined;
-    // console.log( postindex);
+    // console.log( cityId);
     const postOfficesInCity = await getPostOffices(
       cityId as string,
       postindex as string

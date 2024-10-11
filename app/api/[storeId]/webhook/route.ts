@@ -64,13 +64,13 @@ export async function POST(req: Request, res: NextResponse) {
       // Оновлення статусу замовлення в базі даних
       await prismadb.order.update({
         where: { id: reference },
-        data: { orderStatus: 'paid', isPaid: true },
+        data: {  isPaid: true },
       });
     } else {
       // Обробка неуспішної оплати
       await prismadb.order.update({
         where: { id: reference },
-        data: { orderStatus: 'failed' },
+        data: { orderState: 'failed' },
       });
     }
 

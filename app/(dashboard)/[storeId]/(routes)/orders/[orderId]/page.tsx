@@ -30,10 +30,8 @@ const OrderPage = async ({
 
  const formattedProducts = (products: Product[]) => {
   return products.map(product => {return {
-    id: product.id,
-    name : product.name,
-    quantity: product.quantity,
-    price: parseFloat(String(product?.price)),
+    ...product,
+    price: parseInt(String(product?.price)),
        };})
  }
 
@@ -41,7 +39,7 @@ const OrderPage = async ({
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <OrderForm
-          products={products}
+          products={formattedProducts(products)}
           initialData={order}
         />
       </div>
