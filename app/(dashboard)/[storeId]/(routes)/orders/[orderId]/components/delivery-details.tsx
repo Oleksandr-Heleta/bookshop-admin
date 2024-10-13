@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { OrderFormValues } from "./schemas";
 import { Trash, CheckIcon, ChevronDown, Plus } from "lucide-react";
@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn, deliveries, posts } from "@/lib/utils";
+import { useDebounce } from "@/components/ui/multi-select";
 
 interface InitialsProps {
   post?: string;
@@ -59,55 +60,65 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
   const params = useParams();
 
   const [cities, setCities] = useState<{ id: string; name: string }[]>([]);
-  const [postOffices, setPostOffices] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [postOffices, setPostOffices] = useState<
+    { id: string; name: string }[]
+  >([]);
   const [cityQuery, setCityQuery] = useState("");
   const [postOfficeQuery, setPostOfficeQuery] = useState("");
   const [postType, setPostType] = useState(initialData.post ?? "new-post");
   const [deliveryType, setDeliveryType] = useState(
     initialData.delivery ?? "post"
   );
+  const [commandKey, setCommandKey] = useState(0);
 
-  // useEffect(() => {
-  //   if (initialData.city) form.setValue("city", initialData.city);
-  //   if (initialData.cityId) form.setValue("cityId", initialData.cityId);
-  //   if (initialData.address) form.setValue("address", initialData.address);
-  //   if (initialData.addressId) form.setValue("addressId", initialData.addressId);
-  // }, []);
+  const cityInputRef = useRef<HTMLInputElement>(null);
+  const postOfficeInputRef = useRef<HTMLInputElement>(null);
+
+  const debouncedCityQuery = useDebounce(cityQuery, 500);
 
   useEffect(() => {
-    if (cityQuery && cyrillicPattern.test(cityQuery)) {
+    if (cityQuery && debouncedCityQuery && cyrillicPattern.test(cityQuery)) {
       const fetchCities = async () => {
         try {
           const response = await axios.get(
             `/api/${params.storeId}/${postType}/cities?cityNamePart=${cityQuery}`
           );
           setCities(response.data.data);
+          setCommandKey((prevKey) => prevKey + 1);
+          cityInputRef.current?.focus();
+          cityInputRef.current?.setSelectionRange(cityInputRef.current.value.length, cityInputRef.current.value.length);
         } catch (error) {
           console.log(error);
         }
       };
       fetchCities();
     }
-  }, [cityQuery, postType, params.storeId]);
+  }, [debouncedCityQuery, postType, params.storeId]);
+
+  const debouncedPostOfficeQuery = useDebounce(postOfficeQuery, 500);
 
   useEffect(() => {
     const cityId = form.getValues("cityId");
-    if (cityId && postOfficeQuery && cyrillicPattern.test(postOfficeQuery)) {
+    if (cityId && debouncedPostOfficeQuery && cyrillicPattern.test(postOfficeQuery)) {
       const fetchPostOffices = async () => {
         try {
           const response = await axios.get(
             `/api/${params.storeId}/${postType}/posts?city_id=${cityId}&postindex=${postOfficeQuery}`
           );
-          if (response.data.data.length) setPostOffices(response.data.data);
+          if (response.data.data.length) {
+            setPostOffices(response.data.data);
+            setCommandKey((prevKey) => prevKey + 1);
+            postOfficeInputRef.current?.focus();
+            postOfficeInputRef.current?.setSelectionRange(postOfficeInputRef.current.value.length, postOfficeInputRef.current.value.length);
+          }
+          // console.log("data", response.data.data);
         } catch (error) {
           console.log(error);
         }
       };
       fetchPostOffices();
     }
-  }, [postOfficeQuery, form.getValues("cityId"), postType, params.storeId]);
+  }, [debouncedPostOfficeQuery, form.getValues("cityId"), postType, params.storeId]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 items-end gap-8">
@@ -195,6 +206,7 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
+                   disabled={loading}
                     variant="outline"
                     role="combobox"
                     className={cn(
@@ -202,20 +214,22 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
                       !field.value && "text-muted-foreground"
                     )}
                   >
-                    {field.value ? form.getValues('city') : "Виберіть місто"}
+                    {field.value ? form.getValues("city") : "Виберіть місто"}
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
-                <Command>
+                <Command key={commandKey} filter={() => { return 1; }}>
                   <CommandInput
+                    ref={cityInputRef}
                     placeholder="Пошук міста..."
                     className="h-9"
                     onValueChange={(value) => setCityQuery(value)}
+                    value={cityQuery}
                   />
                   <CommandEmpty>Місто не знайдено.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="max-h-60 overflow-scroll">
                     {cities.map((city) => (
                       <CommandItem
                         value={city.name}
@@ -258,6 +272,7 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
+                     disabled={loading}
                       variant="outline"
                       role="combobox"
                       className={cn(
@@ -273,14 +288,16 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
-                  <Command>
+                  <Command key={commandKey} filter={() => { return 1; }}>
                     <CommandInput
+                      ref={postOfficeInputRef}
                       placeholder="Пошук відділення..."
                       className="h-9"
                       onValueChange={(value) => setPostOfficeQuery(value)}
+                      value={postOfficeQuery}
                     />
                     <CommandEmpty>Відділення не знайдено.</CommandEmpty>
-                    <CommandGroup>
+                    <CommandGroup className="max-h-60 overflow-scroll">
                       {postOffices.map((postOffice) => (
                         <CommandItem
                           value={postOffice.name}

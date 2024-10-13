@@ -28,6 +28,13 @@ export type OrderColumn = {
 
 export const columns: ColumnDef<OrderColumn>[] = [
   {
+    accessorKey: "createdAt",
+    header: "Дата",
+    cell: ({row})=>{
+      return row.original.createdAt;
+    },
+  },
+  {
     accessorKey: "products",
     header: "Товари",
     cell: ({row})=>{

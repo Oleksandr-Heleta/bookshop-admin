@@ -66,7 +66,7 @@ export async function POST(req: Request, res: NextResponse) {
         where: { id: reference },
         data: {  isPaid: true },
       });
-    } else {
+    } else if (status === 'failed' || status === 'expired') {
       // Обробка неуспішної оплати
       await prismadb.order.update({
         where: { id: reference },

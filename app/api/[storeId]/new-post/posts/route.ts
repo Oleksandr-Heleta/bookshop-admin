@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
-export const novaPoshtaApi = axios.create({
+ const novaPoshtaApi = axios.create({
   baseURL: 'https://api.novaposhta.ua/v2.0/json/',
 });
 
@@ -43,7 +43,6 @@ export  async function GET(
         calledMethod: 'getWarehouses',
         methodProperties: {
           CityRef: cityId || 'Київ',
-  
           Limit: '50',
           Language: 'UA',
           FindByString: postindex || '',
@@ -54,6 +53,7 @@ export  async function GET(
       if (status !== 200) {
         throw new Error(`Failed to fetch data: ${status}`);
       }
+      // console.log(postindex, data.data);
       const postOffices = data.data.map((post: { Ref: string; Description: string }) => ({
         id: post.Ref,
         name: post.Description,

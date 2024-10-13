@@ -1,7 +1,7 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 
-export const novaPoshtaApi = axios.create({
+ const novaPoshtaApi = axios.create({
   baseURL: "https://api.novaposhta.ua/v2.0/json/",
 });
 

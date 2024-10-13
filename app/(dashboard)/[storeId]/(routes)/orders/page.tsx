@@ -41,7 +41,7 @@ const formattedOrders : OrderColumn[] = orders.map((item) => ({
     isPaid: item.isPaid,
     post: item.post,
     delivery: item.delivery,
-    createdAt: format(item.createdAt, "do MMMM , yyyy"),
+    createdAt: format(item.createdAt, "dd.MM.yyyy"),
 }));
   
    
