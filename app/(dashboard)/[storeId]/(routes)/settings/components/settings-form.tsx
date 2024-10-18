@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Billboard, MainBillboard, Store } from '@prisma/client';
-import { Heading } from '@/components/ui/heading';
-import { Button } from '@/components/ui/button';
-import { Trash } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import * as z from 'zod';
-import { set, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { Billboard, MainBillboard, Store } from "@prisma/client";
+import { Heading } from "@/components/ui/heading";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import * as z from "zod";
+import { set, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -16,16 +16,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import { useParams, useRouter } from 'next/navigation';
-import { AlertModal } from '@/components/modals/alert-modal';
-import { ApiAlert } from '@/components/ui/api-alert';
-import { useOrigin } from '@/hooks/use-origin';
-import MultipleSelector from '@/components/ui/multi-select';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { useParams, useRouter } from "next/navigation";
+import { AlertModal } from "@/components/modals/alert-modal";
+import { ApiAlert } from "@/components/ui/api-alert";
+import { useOrigin } from "@/hooks/use-origin";
+import MultipleSelector from "@/components/ui/multi-select";
 
 interface SettingsFormProps {
   initialData: Store;
@@ -66,7 +66,10 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
     resolver: zodResolver(formShema),
     defaultValues: {
       ...initialData,
-      mainbillboards: mainbillboards,
+      mainbillboards: mainbillboards.map((billboard) => ({
+        value: billboard.id,
+        label: billboard.label,
+      })),
       description: initialData.description || undefined,
       titleSeo: initialData.titleSeo || undefined,
       descriptionSeo: initialData.descriptionSeo || undefined,
@@ -76,12 +79,12 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
   const onSubmit = async (data: SettingsFormValues) => {
     try {
       setLoading(true);
-      console.log(data);
+      // console.log(data);
       await axios.patch(`/api/stores/${params.storeId}`, data);
       router.refresh();
-      toast.success('Магазин успішно оновлено!');
+      toast.success("Магазин успішно оновлено!");
     } catch (error) {
-      toast.error('Щось пішло не так!');
+      toast.error("Щось пішло не так!");
     } finally {
       setLoading(false);
     }
@@ -92,10 +95,10 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
       setLoading(true);
       await axios.delete(`/api/stores/${params.storeId}`);
       router.refresh();
-      router.push('/');
-      toast.success('Магазин видалено.');
+      router.push("/");
+      toast.success("Магазин видалено.");
     } catch (error) {
-      toast.error('Переконайтесь що всі категорії видалені.');
+      toast.error("Переконайтесь що всі категорії видалені.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -156,13 +159,26 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
                     value={field.value}
                     disabled={loading}
                     onChange={field.onChange}
-                    defaultOptions={billboards.map((billboard) => {
-                      return { value: billboard.id, label: billboard.label };
-                    })}
+                    onSearch={async (value) => {
+                      return billboards
+                        .filter((billboard) =>
+                          billboard.label
+                            .toLowerCase()
+                            .match(value.toLowerCase())
+                        )
+                        .map((billboard) => ({
+                          value: billboard.id,
+                          label: billboard.label,
+                        }));
+                    }}
+                    defaultOptions={billboards.map((billboard) => ({
+                      value: billboard.id,
+                      label: billboard.label,
+                    }))}
                     placeholder="Оберіть білборди для головної сторінки"
                     emptyIndicator={
                       <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                        no results found.
+                        нічого не знайдено
                       </p>
                     }
                   />
@@ -185,7 +201,7 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
                       onChange={(e) => {
                         // Перетворення рядка в число
                         const value =
-                          e.target.value === '' ? '' : Number(e.target.value);
+                          e.target.value === "" ? "" : Number(e.target.value);
                         field.onChange(value); // Виклик onChange з перетвореним значенням
                       }}
                     />
@@ -211,7 +227,7 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
                   <FormMessage />
                 </FormItem>
               )}
-            />{' '}
+            />{" "}
             <FormField
               control={form.control}
               name="titleSeo"

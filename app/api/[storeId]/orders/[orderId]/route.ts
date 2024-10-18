@@ -135,7 +135,14 @@ export async function PATCH(
             },
           });
         }
-
+        if (product.quantity > 0 && product.quantity < 3) {
+          await prismadb.product.update({
+            where: { id: newProduct.id },
+            data: {
+              isLowQuantity: true,
+            },
+          });
+        }
         if (product.quantity <= 0) {
           await prismadb.product.update({
             where: { id: newProduct.id },

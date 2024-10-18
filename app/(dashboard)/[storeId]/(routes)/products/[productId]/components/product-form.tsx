@@ -133,7 +133,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [loading, setLoading] = useState(false);
 
   const title = initialData ? 'Редагування товару' : 'Створення товару';
-  const description = initialData ? 'Редагувани товар' : 'Додати новий товар';
+  const description = initialData ? 'Редагувати товар' : 'Додати новий товар';
   const toastMessage = initialData ? 'Продукт оновлено.' : 'Продукт створено.';
   const action = initialData ? 'Зберегти зміни' : 'Створити';
 
@@ -385,13 +385,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     value={field.value}
                     disabled={loading}
                     onChange={field.onChange}
+                    onSearch={async (value) => {
+                      return categories
+                        .filter((category) => category.name.toLowerCase().match(value.toLowerCase()))
+                        .map((category) => ({ label: category.name, value: category.id }));
+                    }}  
                     defaultOptions={categories.map((category) => {
                       return { value: category.id, label: category.name };
                     })}
                     placeholder="Оберіть категорії"
                     emptyIndicator={
                       <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                        no results found.
+                        не знайдено
                       </p>
                     }
                   />
@@ -410,13 +415,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     value={field.value}
                     disabled={loading}
                     onChange={field.onChange}
+                    onSearch={async (value) => {
+                      return ageGroups
+                        .filter((ageGroup) => ageGroup.name.toLowerCase().match(value.toLowerCase()))
+                        .map((ageGroup) => ({ label: ageGroup.name, value: ageGroup.id }));
+                    }}  
                     defaultOptions={ageGroups.map((ageGroup) => {
                       return { value: ageGroup.id, label: ageGroup.name };
                     })}
                     placeholder="Оберіть вікові групи"
                     emptyIndicator={
                       <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                        no results found.
+                       не знайдено
                       </p>
                     }
                   />
@@ -500,13 +510,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     value={field.value}
                     disabled={loading}
                     onChange={field.onChange}
+                    onSearch={async (value) => {
+                      return products
+                        .filter((product) => product.name.toLowerCase().match(value.toLowerCase()))
+                        .map((product) => ({ label: product.name, value: product.id }));
+                    }}            
                     defaultOptions={products.map((product) => {
                       return { value: product.id, label: product.name };
                     })}
                     placeholder="Оберіть товари які будуть рекомендовані на сторінці"
                     emptyIndicator={
                       <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                        no results found.
+                        не знайдено
                       </p>
                     }
                   />

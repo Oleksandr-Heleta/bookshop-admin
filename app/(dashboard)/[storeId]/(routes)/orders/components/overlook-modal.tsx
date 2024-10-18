@@ -54,6 +54,10 @@ const OverlookModal: React.FC<OverlookModalProps> = ({ isOpen, onClose, order })
                 <div className="text-sm font-semibold">Адреса:</div>
                 <div>{order.address}</div>
             </div>
+            {order.ttnumber && <div className="flex justify-start gap-2"> 
+                `Відправлення за номером ${order.ttnumber}`
+            </div>
+                }
            
             </div>
             <Separator/>

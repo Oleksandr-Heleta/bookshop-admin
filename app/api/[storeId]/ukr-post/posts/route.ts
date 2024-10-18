@@ -48,7 +48,7 @@ export async function GET(
       postindex as string
     );
 
-    // console.log(postOfficesInCity);
+    console.log(postOfficesInCity);
 
     const postOffices = postOfficesInCity
       .filter((postOffice: any) => {

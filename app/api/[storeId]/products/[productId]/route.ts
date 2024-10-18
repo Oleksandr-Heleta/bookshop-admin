@@ -270,27 +270,7 @@ export async function DELETE(
       },
     });
 
-    // const suggestedBy = await prismadb.product.findMany({
-    //   where: {
-    //     suggestionProducts: {
-    //       some: {
-    //         id: params.productId,
-    //       },
-    //     },
-    //   },
-    // });
-
-    // for (const product of suggestedBy) {
-    //   await prismadb.product.update({
-    //     where: { id: params.productId },
-    //     data: {
-    //       suggestionProducts: {
-    //         disconnect: { id: product.id },
-    //       },
-    //     },
-    //   });
-    // }
-
+  
     // console.log("Deleting product...");
     const product = await prismadb.product.deleteMany({
       where: {

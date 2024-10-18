@@ -69,10 +69,7 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
   const [deliveryType, setDeliveryType] = useState(
     initialData.delivery ?? "post"
   );
-  const [commandKey, setCommandKey] = useState(0);
 
-  const cityInputRef = useRef<HTMLInputElement>(null);
-  const postOfficeInputRef = useRef<HTMLInputElement>(null);
 
   const debouncedCityQuery = useDebounce(cityQuery, 500);
 
@@ -84,9 +81,7 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
             `/api/${params.storeId}/${postType}/cities?cityNamePart=${cityQuery}`
           );
           setCities(response.data.data);
-          setCommandKey((prevKey) => prevKey + 1);
-          cityInputRef.current?.focus();
-          cityInputRef.current?.setSelectionRange(cityInputRef.current.value.length, cityInputRef.current.value.length);
+         
         } catch (error) {
           console.log(error);
         }
@@ -107,9 +102,7 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
           );
           if (response.data.data.length) {
             setPostOffices(response.data.data);
-            setCommandKey((prevKey) => prevKey + 1);
-            postOfficeInputRef.current?.focus();
-            postOfficeInputRef.current?.setSelectionRange(postOfficeInputRef.current.value.length, postOfficeInputRef.current.value.length);
+                    
           }
           // console.log("data", response.data.data);
         } catch (error) {
@@ -220,9 +213,8 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
-                <Command key={commandKey} filter={() => { return 1; }}>
+                <Command  filter={() => { return 1; }}>
                   <CommandInput
-                    ref={cityInputRef}
                     placeholder="Пошук міста..."
                     className="h-9"
                     onValueChange={(value) => setCityQuery(value)}
@@ -288,9 +280,8 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
-                  <Command key={commandKey} filter={() => { return 1; }}>
+                  <Command  filter={() => { return 1; }}>
                     <CommandInput
-                      ref={postOfficeInputRef}
                       placeholder="Пошук відділення..."
                       className="h-9"
                       onValueChange={(value) => setPostOfficeQuery(value)}
@@ -300,7 +291,7 @@ export const DeliveryDetails: React.FC<DeliveryDetailsProps> = ({
                     <CommandGroup className="max-h-60 overflow-scroll">
                       {postOffices.map((postOffice) => (
                         <CommandItem
-                          value={postOffice.name}
+                          value={CSS.escape(postOffice.name)}
                           key={postOffice.id}
                           onSelect={() => {
                             form.setValue("address", postOffice.name);

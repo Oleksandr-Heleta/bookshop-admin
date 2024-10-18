@@ -14,9 +14,12 @@ export type OrderColumn = {
   phone: string;
   call: boolean;
   city: string
+  cityId: string;
   address: string;
+  addressId: string;
   post: string;
   delivery: string;
+  ttnumber: string | undefined;
   isPaid: boolean;
   totalPrice: string;
   products: string[];
