@@ -84,8 +84,8 @@ export async function GET(
         (product) => `
 <offer id="${product.id}" available="${!product.isArchived}">
 <price>${product.price}</price>
-<price_old>199</price_old>
-<category code="231" parentCode="230">Дитячі книги</category>
+<category code="231">Дитячі книги</category>
+<attribute_set code="231">Дитячі книги</attribute_set>
  ${product.images
           .map((image) => `<picture>${image.url}</picture>`)
           .join('')}
@@ -99,8 +99,8 @@ export async function GET(
 
 <description lang="ua"><![CDATA[${product.description}]]></description>
 
-<attribute_set code="231">Дитячі книги</attribute_set>
-<param paramcode="country_of_origin" name="Країна-виробник" valuecode="ukr">Україна</param>
+
+<country_of_origin valuecode="ukr">Україна</country_of_origin>
 <param paramcode="2031" name="Мова" valuecode="3558e8c28b0ebb9794a1d7c3ec0cf397">українська</param>
 <param paramcode="ratio" name="Мінімальна кратність товару"><![CDATA[1]]></param>
 <param paramcode="11257" name="Вікова аудиторія" >
@@ -118,10 +118,10 @@ ${product.titleSheet == "Solid" ? `<param paramcode="2028" name="Палітур�
 <param paramcode="2469" name="Стать"  valuecode="59474de517e96,59474de517f3e" >для дівчаток, для хлопчиків</param>
 <param paramcode="brand" name="Бренд" valuecode=" " >${product.publishing.name}</param>
 
-<param paramcode="width" name="Ширина"><![CDATA[10]]></param>
-<param paramcode="height" name="Висота"><![CDATA[20]]></param>
-<param paramcode="length" name="Глибина"><![CDATA[3]]></param>
-<param paramcode="weight" name="Вага"><![CDATA[100]]></param>
+<width>10</param>
+<height>20</param>
+<length>3></param>
+<weight>100</param>
 
 </offer>`
       )

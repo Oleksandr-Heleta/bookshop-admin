@@ -82,6 +82,9 @@ export async function GET(
       where: {
         storeId: params.storeId,
       },
+      orderBy: {
+        name: 'asc',
+      },
     });
 
     return NextResponse.json(categories);
