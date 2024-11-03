@@ -77,9 +77,31 @@ export async function GET(
       return new NextResponse('Store ID is required', { status: 400 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const categoryId = searchParams.get('categoryId') || undefined;
+    const ageGroupId = searchParams.get('ageGroupId') || undefined;
+
     const publishings = await prismadb.publishing.findMany({
       where: {
         storeId: params.storeId,
+        products: {
+          some: {
+              ...(categoryId && {
+                categories: {
+                  some: {
+                    categoryId: categoryId,
+                  },
+                },
+              }),
+              ...(ageGroupId && {
+                ageGroups: {
+                  some: {
+                    ageGroupId: ageGroupId,
+                  },
+                },
+              }),
+            },
+          },
       },
       orderBy: {
         name: 'asc',
@@ -88,7 +110,7 @@ export async function GET(
 
     return NextResponse.json(publishings);
   } catch (error) {
-    console.log('[publishing_GET]', error);
+    console.log('[PUBLISHINGS_GET]', error);
     return new NextResponse('Internal error', { status: 500 });
   }
 }

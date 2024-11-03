@@ -77,12 +77,32 @@ export async function GET(
       return new NextResponse('Store ID is required', { status: 400 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const categoryId = searchParams.get('categoryId') || undefined;
+    const publishingId = searchParams.get('publishingId') || undefined;
+
     const ageGroup = await prismadb.ageGroup.findMany({
       where: {
         storeId: params.storeId,
+        products: {
+          some: {
+            product: {
+              ...(categoryId && {
+                categories: {
+                  some: {
+                    categoryId: categoryId,
+                  },
+                },
+              }),
+              ...(publishingId && {
+                publishingId: publishingId,
+              }),
+            },
+          },
+        },
       },
       orderBy: {
-        value: 'asc',
+        name: 'asc',
       },
     });
 
