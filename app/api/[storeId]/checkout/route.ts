@@ -1,10 +1,10 @@
-import prismadb from '@/lib/prismadb';
+import prismadb from "@/lib/prismadb";
 // import { Decimal } from '@prisma/client/runtime';
-import { auth } from '@clerk/nextjs';
-import { NextResponse } from 'next/server';
-import { sendMessage } from '@/lib/telegram-chat';
-import { OrderItem, Product, Image } from '@prisma/client';
-import { generateUniqueId } from '@/lib/utils';
+import { auth } from "@clerk/nextjs";
+import { NextResponse } from "next/server";
+import { sendMessage } from "@/lib/telegram-chat";
+import { OrderItem, Product, Image } from "@prisma/client";
+import { generateUniqueId } from "@/lib/utils";
 
 interface ProductWithImages extends Product {
   images: Image[];
@@ -26,7 +26,7 @@ async function getOrderItemsWithProductDetails(
       include: {
         images: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },
@@ -44,9 +44,9 @@ async function getOrderItemsWithProductDetails(
 }
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': `${process.env.FRONTEND_STORE_URL}`,
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 export async function OPTIONS() {
@@ -81,31 +81,52 @@ export async function POST(
     // console.log(body);
 
     if (!phone) {
-      return new NextResponse('Phone is required', { status: 400 });
+      return new NextResponse("Phone is required", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     if (!name) {
-      return new NextResponse('Name is required', { status: 400 });
+      return new NextResponse("Name is required", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     if (!surname) {
-      return new NextResponse('Name is required', { status: 400 });
+      return new NextResponse("Name is required", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     if (!city) {
-      return new NextResponse('City is required', { status: 400 });
+      return new NextResponse("City is required", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     if (!address) {
-      return new NextResponse('Address is required', { status: 400 });
+      return new NextResponse("Address is required", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     if (!orderItems) {
-      return new NextResponse('orderItems is required', { status: 400 });
+      return new NextResponse("orderItems is required", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     if (!params.storeId) {
-      return new NextResponse('Store ID is required', { status: 400 });
+      return new NextResponse("Store ID is required", {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
@@ -115,16 +136,55 @@ export async function POST(
     });
 
     if (!storeByUserId) {
-      return new NextResponse('Unauthorized', { status: 403 });
+      return new NextResponse("Unauthorized", {
+        status: 403,
+        headers: corsHeaders,
+      });
+    }
+
+    for (const orderItem of orderItems) {
+      const product = await prismadb.product.findUnique({
+        where: { id: orderItem.productId },
+      });
+
+      if (!product) {
+        return new NextResponse(
+          JSON.stringify({
+            message: `Product with ID ${orderItem.productId} not found`,
+            productId: orderItem.productId,
+          }),
+          { status: 404, headers: corsHeaders }
+        );
+      }
+
+      if (product.isArchived) {
+        return new NextResponse(
+          JSON.stringify({
+            message: `Product with ID ${orderItem.productId} is archived`,
+            productId: orderItem.productId,
+          }),
+          { status: 410, headers: corsHeaders }
+        );
+      }
+
+      if (product.quantity < orderItem.quantity) {
+        return new NextResponse(
+          JSON.stringify({
+            message: `Insufficient quantity for product with ID ${orderItem.productId}`,
+            productId: orderItem.productId,
+          }),
+          { status: 409, headers: corsHeaders }
+        );
+      }
     }
 
     const sale = storeByUserId.sale;
 
-    if (isPaid || (payment === 'afterrecive' && orderStatus === 'sended')) {
+    if (isPaid || (payment === "afterrecive" && orderStatus === "sended")) {
       isPaid = true;
     }
 
-    const id = await generateUniqueId('order');
+    const id = await generateUniqueId("order");
 
     const order = await prismadb.order.create({
       data: {
@@ -141,7 +201,7 @@ export async function POST(
         call,
         post,
         delivery,
-        createdBy: 'BYSITE',
+        createdBy: "BYSITE",
         isPaid,
         totalPrice,
         storeId: params.storeId,
@@ -204,9 +264,9 @@ export async function POST(
 
     let linkUrl = `${process.env.FRONTEND_STORE_URL}/order-confirm?orderId=${order.id}`;
 
-    if (payment === 'online') {
+    if (payment === "online") {
       if (!process.env.MONOBANK_API_TOKEN) {
-        throw new Error('MONOBANK_API_TOKEN is not defined');
+        throw new Error("MONOBANK_API_TOKEN is not defined");
       }
 
       const orderItemsWithProductDetails =
@@ -218,8 +278,8 @@ export async function POST(
           if (sale > 0 || item.product.isSale) {
             const percent = item.product.isSale ? item.product.sale : sale;
             discount.push({
-              type: 'DISCOUNT',
-              mode: 'PERCENT',
+              type: "DISCOUNT",
+              mode: "PERCENT",
               value: percent,
             });
           }
@@ -232,7 +292,7 @@ export async function POST(
             sum: sum,
             icon: item.product.images[0].url,
             code: item.product.id,
-            unit: 'шт.',
+            unit: "шт.",
             discounts: discount,
           };
         }
@@ -241,21 +301,21 @@ export async function POST(
       // console.log(bascetOrder);
       // Створення інвойсу в Monobank
       const response = await fetch(
-        'https://api.monobank.ua/api/merchant/invoice/create',
+        "https://api.monobank.ua/api/merchant/invoice/create",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'X-Token': process.env.MONOBANK_API_TOKEN,
-            'Content-Type': 'application/json',
+            "X-Token": process.env.MONOBANK_API_TOKEN,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             amount: totalPrice * 100, // сума в копійках
             ccy: 980, // код валюти (UAH)
             merchantPaymInfo: {
               reference: order.id,
-              destination: 'Оплата замовлення',
+              destination: "Оплата замовлення",
               comment: order.id,
-              customerEmails: ['peterone051@gmail.com'],
+              customerEmails: ["peterone051@gmail.com"],
               basketOrder: bascetOrder,
             },
             redirectUrl: `${process.env.FRONTEND_STORE_URL}/order-confirm?orderId=${order.id}`,
@@ -274,7 +334,10 @@ export async function POST(
 
     return NextResponse.json({ url: linkUrl }, { headers: corsHeaders }); //
   } catch (error) {
-    console.log('[ORDER_POST]', error);
-    return new NextResponse('Internal error', { status: 500 });
+    console.log("[ORDER_POST]", error);
+    return new NextResponse("Internal error", {
+      status: 500,
+      headers: corsHeaders,
+    });
   }
 }
