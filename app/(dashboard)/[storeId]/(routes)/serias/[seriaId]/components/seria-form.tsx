@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Seria } from '@prisma/client';
-import { Heading } from '@/components/ui/heading';
-import { Button } from '@/components/ui/button';
-import { Trash } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import * as z from 'zod';
-import { set, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { Seria } from "@prisma/client";
+import { Heading } from "@/components/ui/heading";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import * as z from "zod";
+import { set, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -16,14 +16,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import { useParams, useRouter } from 'next/navigation';
-import { AlertModal } from '@/components/modals/alert-modal';
-import ImageUpload from '@/components/ui/image-upload';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { useParams, useRouter } from "next/navigation";
+import { AlertModal } from "@/components/modals/alert-modal";
+import ImageUpload from "@/components/ui/image-upload";
 
 const formShema = z.object({
   id: z.string().min(5),
@@ -44,13 +44,15 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
 
+  // console.log("params", params);
+
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? 'Редагування серії' : 'Створення серії';
-  const description = initialData ? 'Редагувати серію' : 'Додати нову серію';
-  const toastMessage = initialData ? 'серію оновлено' : 'серію створено';
-  const action = initialData ? 'Зберегти зміни' : 'Створити';
+  const title = initialData ? "Редагування серії" : "Створення серії";
+  const description = initialData ? "Редагувати серію" : "Додати нову серію";
+  const toastMessage = initialData ? "серію оновлено" : "серію створено";
+  const action = initialData ? "Зберегти зміни" : "Створити";
 
   const form = useForm<SeriaFormValues>({
     resolver: zodResolver(formShema),
@@ -62,9 +64,9 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
           descriptionSeo: initialData.descriptionSeo || undefined,
         }
       : {
-          id: '',
-          name: '',
-          value: '',
+          id: "",
+          name: "",
+          value: "",
           description: undefined,
           titleSeo: undefined,
           descriptionSeo: undefined,
@@ -75,8 +77,9 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       if (initialData) {
+        // console.log("seriaId", params.seriaId);
         await axios.patch(
-          `/api/${params.storeId}/serias/${params.publishingId}`,
+          `/api/${params.storeId}/serias/${params.seriaId}`,
           data
         );
       } else {
@@ -86,7 +89,7 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
       router.push(`/${params.storeId}/serias`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error('Щось пішло не так!');
+      toast.error("Щось пішло не так!");
     } finally {
       setLoading(false);
     }
@@ -100,9 +103,9 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
       );
       router.refresh();
       router.push(`/${params.storeId}/serias`);
-      toast.success('Серію видалено.');
+      toast.success("Серію видалено.");
     } catch (error) {
-      toast.error('Переконайтесь що видалені всі товари з цієї серії.');
+      toast.error("Переконайтесь що видалені всі товари з цієї серії.");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -207,7 +210,7 @@ export const SeriaForm: React.FC<SeriaFormProps> = ({ initialData }) => {
                   <FormMessage />
                 </FormItem>
               )}
-            />{' '}
+            />{" "}
             <FormField
               control={form.control}
               name="titleSeo"
