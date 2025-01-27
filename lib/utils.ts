@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import prismadb from "./prismadb";
 import { PrismaClient } from "@prisma/client";
 import { ca } from "date-fns/locale";
+import { columns } from "@/app/(dashboard)/[storeId]/(routes)/age-groups/components/columns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -92,11 +93,11 @@ export async function ChangeId(
 }
 
 export const statuses = [
-  { name: "Не оброблено", value: "new" },
-  { name: "Зпаковано", value: "ready" },
-  { name: "Відправлено", value: "sended" },
-  { name: "Повернуто", value: "returned" },
-  { name: "Завершено", value: "completed" },
+  { name: "Не оброблено", value: "new", color: "red-500" },
+  { name: "Зпаковано", value: "ready", color: "red-500" },
+  { name: "Відправлено", value: "sended", color: "black" },
+  { name: "Повернуто", value: "returned", color: "black" },
+  { name: "Завершено", value: "completed", color: "black" },
 ];
 
 export const states = [
