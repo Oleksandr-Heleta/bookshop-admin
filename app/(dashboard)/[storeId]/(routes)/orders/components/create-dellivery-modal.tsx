@@ -1,8 +1,8 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -44,7 +44,7 @@ interface OverlookModalProps {
 const phoneRegex = /^\+380\d{9}$/;
 
 const orderSchema = z.object({
-    orderId: z.string().min(1),
+  orderId: z.string().min(1),
   name: z.string().min(1),
   surname: z.string().min(1),
   phone: z.string().refine((value) => phoneRegex.test(value), {
@@ -73,8 +73,9 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
   onClose,
   order,
 }) => {
-    const params = useParams();
+  const params = useParams();
   const [loading, setLoading] = useState(false);
+  const [ttn, setTtn] = useState<string | undefined>(order.ttnumber);
 
   const form = useForm<CreateDelliveryValues>({
     resolver: zodResolver(orderSchema),
@@ -94,26 +95,37 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
       cargoType: "Documents",
       delivery: order.delivery,
       date: new Date(),
-      totalPrice: (order.orderState === 'afterrecive'|| Number(order.totalPrice) < 300) ? order.totalPrice : '300',
+      totalPrice:
+        order.orderState === "afterrecive" || Number(order.totalPrice) < 300
+          ? order.totalPrice
+          : "300",
     },
   });
 
   const isPoshtomat = order.address.match(/Поштомат/);
 
   const onSubmit = async (data: CreateDelliveryValues) => {
-    console.log(data);
+    // console.log(data);
     try {
-        setLoading(true);
-        
-        const ttnumber =  await axios.post(
-            `/api/${params.storeId}/new-post/create-delivery`,
-            data
-          );
-        // console.log(ttnumber);
-         toast.success(`Відправлення створено успішно! ТТН: ${ttnumber.data.data}`);
-         
+      setLoading(true);
+
+      const ttnumber = await axios.post(
+        `/api/${params.storeId}/new-post/create-delivery`,
+        data
+      );
+      // console.log(ttnumber);
+      toast.success(
+        `Відправлення створено успішно! ТТН: ${ttnumber.data.data}`
+      );
+      setTtn(ttnumber.data.data);
     } catch (error) {
-      toast.error('Щось пішло не так!');
+      if (axios.isAxiosError(error) && error.response) {
+        // console.log(error.response.data);
+        toast.error(String(error.response.data));
+      } else {
+        // console.log(error);
+        toast.error("Помилка при створенні відправлення");
+      }
     } finally {
       setLoading(false);
     }
@@ -171,7 +183,7 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Sender"  >Відправник</SelectItem>
+                      <SelectItem value="Sender">Відправник</SelectItem>
                       <SelectItem value="Recipient">Одержувач</SelectItem>
                     </SelectContent>
                   </Select>
@@ -202,7 +214,9 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
                     <SelectContent>
                       <SelectItem value="Documents">Документи</SelectItem>
                       <SelectItem value="Parcel">Посилка</SelectItem>
-                      <SelectItem value="Cargo" disabled={!!isPoshtomat}>Вантаж</SelectItem>
+                      <SelectItem value="Cargo" disabled={!!isPoshtomat}>
+                        Вантаж
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -259,24 +273,26 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
             />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 items-end gap-8">
-          <FormField
+            <FormField
               control={form.control}
               name="height"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Висота</FormLabel>
                   <FormControl>
-                  <div>
-                    <Input
-                      min="1"
-                      max={isPoshtomat ? "30" : undefined}
-                      type="number"
-                      step="1"
-                      disabled={loading || form.getValues("cargoType") === "Documents"}
-                      defaultValue={field.value}
-                      {...field}
-                    />
-                    см
+                    <div>
+                      <Input
+                        min="1"
+                        max={isPoshtomat ? "30" : undefined}
+                        type="number"
+                        step="1"
+                        disabled={
+                          loading || form.getValues("cargoType") === "Documents"
+                        }
+                        defaultValue={field.value}
+                        {...field}
+                      />
+                      см
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -290,17 +306,19 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
                 <FormItem>
                   <FormLabel>Ширина</FormLabel>
                   <FormControl>
-                  <div>
-                    <Input
-                      min="1"
-                      max={isPoshtomat ? "40" : undefined}
-                      type="number"
-                      step="1"
-                      disabled={loading || form.getValues("cargoType") === "Documents"}
-                      defaultValue={field.value}
-                      {...field}
-                    />
-                    см
+                    <div>
+                      <Input
+                        min="1"
+                        max={isPoshtomat ? "40" : undefined}
+                        type="number"
+                        step="1"
+                        disabled={
+                          loading || form.getValues("cargoType") === "Documents"
+                        }
+                        defaultValue={field.value}
+                        {...field}
+                      />
+                      см
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -315,16 +333,18 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
                   <FormLabel>Довжина</FormLabel>
                   <FormControl>
                     <div>
-                    <Input
-                      min="1"
-                      max={isPoshtomat ? "60" : undefined}
-                      type="number"
-                      step="1"
-                      disabled={loading || form.getValues("cargoType") === "Documents"}
-                      defaultValue={field.value}
-                      {...field}
-                    />
-                    см
+                      <Input
+                        min="1"
+                        max={isPoshtomat ? "60" : undefined}
+                        type="number"
+                        step="1"
+                        disabled={
+                          loading || form.getValues("cargoType") === "Documents"
+                        }
+                        defaultValue={field.value}
+                        {...field}
+                      />
+                      см
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -338,28 +358,40 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
                 <FormItem>
                   <FormLabel>Вага</FormLabel>
                   <FormControl>
-                  <div>
-                    <Input
-                      min="0.5"
-                      type="number"
-                      step="0.5"
-                      max={form.getValues("cargoType") === "Documents" ? "1" : "30"}
-                      disabled={loading}
-                      defaultValue={field.value}
-                      {...field}
-                    />
-                    кг
+                    <div>
+                      <Input
+                        min="0.5"
+                        type="number"
+                        step="0.5"
+                        max={
+                          form.getValues("cargoType") === "Documents"
+                            ? "1"
+                            : "30"
+                        }
+                        disabled={loading}
+                        defaultValue={field.value}
+                        {...field}
+                      />
+                      кг
                     </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
+          {order.orderState === "afterrecive" && (
+            <div className="text-red-500">
+              Відправлення буде здійснено накладеним платежем
             </div>
-            {order.orderState === 'afterrecive' && <div className="text-red-500">Відправлення буде здійснено накладеним платежем</div> }
+          )}
           <div className="flex justify-end">
-            <Button disabled={loading || !!order.ttnumber} type="submit" className="w-full">
-              {order.ttnumber ? `Вже створено ${order.ttnumber} `: 'Створити'}
+            <Button
+              disabled={loading || !!ttn}
+              type="submit"
+              className="w-full"
+            >
+              {ttn ? `Вже створено ${ttn} ` : "Створити"}
             </Button>
           </div>
         </form>

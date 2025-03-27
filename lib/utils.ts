@@ -1,6 +1,14 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import prismadb from "./prismadb";
+import {
+  startOfDay,
+  startOfWeek,
+  startOfMonth,
+  startOfYear,
+  subYears,
+} from "date-fns";
+import { uk } from "date-fns/locale";
 import { PrismaClient } from "@prisma/client";
 import { ca } from "date-fns/locale";
 import { columns } from "@/app/(dashboard)/[storeId]/(routes)/age-groups/components/columns";
@@ -116,3 +124,46 @@ export const deliveries = [
   { name: "До відділення", value: "post" },
   { name: "За адресою", value: "courier" },
 ];
+
+export type statPeriodsType = "day" | "week" | "month" | "year" | "all";
+
+export const statPeriods = [
+  { name: "За день", value: "day" },
+  { name: "За тиждень", value: "week" },
+  { name: "За місяць", value: "month" },
+  { name: "За рік", value: "year" },
+  { name: "За весь час", value: "all" },
+];
+
+export const getStartDates = (
+  period: statPeriodsType
+): { startDate: Date; higherPeriodStartDate: Date } => {
+  const now = new Date();
+  let startDate: Date;
+  let higherPeriodStartDate: Date;
+
+  switch (period) {
+    case "day":
+      startDate = startOfDay(now);
+      higherPeriodStartDate = startOfWeek(now, { locale: uk, weekStartsOn: 1 }); // Тиждень починається з понеділка
+      break;
+    case "week":
+      startDate = startOfWeek(now, { locale: uk, weekStartsOn: 1 }); // Тиждень починається з понеділка
+      higherPeriodStartDate = startOfMonth(now);
+      break;
+    case "month":
+      startDate = startOfMonth(now);
+      higherPeriodStartDate = startOfYear(now);
+      break;
+    case "year":
+      startDate = startOfYear(now);
+      higherPeriodStartDate = subYears(startDate, 1);
+      break;
+    default:
+      startDate = new Date(0); // За весь час
+      higherPeriodStartDate = new Date(0); // За весь час
+      break;
+  }
+
+  return { startDate, higherPeriodStartDate };
+};

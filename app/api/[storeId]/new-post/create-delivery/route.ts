@@ -45,7 +45,7 @@ const saveContactPerson = async (data: any) => {
     throw new Error(`Failed to fetch data: ${respons.status}`);
   }
 
-  return respons.data.data;
+  return respons.data.data[0];
 };
 
 export async function POST(
@@ -91,22 +91,23 @@ export async function POST(
         person.LastName === surname
     );
 
-    // console.log("before",person);
+    // console.log("before", person);
     if (!person) {
       person = await saveContactPerson({ name, surname, phone });
     }
-    // console.log("after",person);
+    // console.log("after", person);
 
-    let volume =''; 
-    if(cargoType !== "Documents"){
-     volume = String(
-      (Number(width) / 100) * (Number(height) / 100) * (Number(length) / 100)
-    );}
+    let volume = "";
+    if (cargoType !== "Documents") {
+      volume = String(
+        (Number(width) / 100) * (Number(height) / 100) * (Number(length) / 100)
+      );
+    }
 
     const cost = String(totalPrice)
-    .replace(/[^\d,]/g, '') 
-    .replace(',', '.');
-    console.log(cost);
+      .replace(/[^\d,]/g, "")
+      .replace(",", ".");
+    // console.log(cost);
 
     const requestBody: {
       apiKey: string;
@@ -163,7 +164,7 @@ export async function POST(
           delivery === "post" ? "WarehouseWarehouse" : "WarehouseDoors",
         SeatsAmount: "1",
         Description: "Книги",
-        Cost:  cost,
+        Cost: cost,
         CitySender: "f5554065-5712-11e1-a283-0026b97ed48a",
         Sender: "e3c034f0-0c64-11ef-bcd0-48df37b921da",
         SenderAddress: "144aa9f0-b1fc-11ed-9eb1-d4f5ef0df2b8",
@@ -202,10 +203,11 @@ export async function POST(
     };
 
     // console.log(requestBody);
-    const { data, status } = await novaPoshtaApi.post(``, requestBody);
-    if (status !== 200) {
-      throw new Error(`Failed to fetch data: ${status}`);
+    const response = await novaPoshtaApi.post(``, requestBody);
+    if (!response.data.success) {
+      throw new Error(response.data.errors[0]);
     }
+    const { data } = response;
     // console.log(data);
     const intDocNumber = data.data[0].IntDocNumber;
     // console.log(intDocNumber);
@@ -221,6 +223,6 @@ export async function POST(
     // return  NextResponse.json({data: "ok"});
   } catch (error) {
     console.log("[DELIVERY_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse(String(error), { status: 500 });
   }
 }
