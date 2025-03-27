@@ -68,6 +68,10 @@ const orderSchema = z.object({
 
 type CreateDelliveryValues = z.infer<typeof orderSchema>;
 
+const cleanTotalPrice = (price: string): string => {
+  return price.split(",")[0].replace(/[^\d]/g, ""); // Обрізає все після коми і видаляє всі нечислові символи
+};
+
 const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
   isOpen,
   onClose,
@@ -91,14 +95,14 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
       width: undefined,
       height: undefined,
       length: undefined,
-      payerType: Number(order.totalPrice) > 1500 ? "Sender" : "Recipient",
+      payerType:
+        Number(cleanTotalPrice(String(order.totalPrice))) > 1500
+          ? "Sender"
+          : "Recipient",
       cargoType: "Documents",
       delivery: order.delivery,
       date: new Date(),
-      totalPrice:
-        order.orderState === "afterrecive" || Number(order.totalPrice) < 300
-          ? order.totalPrice
-          : "300",
+      totalPrice: cleanTotalPrice(String(order.totalPrice)),
     },
   });
 
@@ -156,8 +160,27 @@ const CreateDelliveryModal: React.FC<OverlookModalProps> = ({
                 <div>{order.phone}</div>
               </div>
               <div className="flex-1">
-                <div className="text-sm font-semibold">Оціночна вартість:</div>
-                <div>{order.totalPrice}</div>
+                <FormField
+                  control={form.control}
+                  name="totalPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Оціночна вартість:</FormLabel>
+                      <FormControl>
+                        <div>
+                          <Input
+                            min="200"
+                            type="number"
+                            step="1"
+                            defaultValue={field.value}
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           </div>

@@ -145,24 +145,36 @@ export const getGraphRevenue = async (
       higherPeriodStartDate
     );
 
-    const monthGraphData: GraphData[] = [
-      { name: "Тиждень 1", current: 0, prev: 0 },
-      { name: "Тиждень 2", current: 0, prev: 0 },
-      { name: "Тиждень 3", current: 0, prev: 0 },
-      { name: "Тиждень 4", current: 0, prev: 0 },
-    ];
+    // Визначаємо кількість днів у поточному місяці
+    const daysInMonth = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      0
+    ).getDate();
 
+    // Ініціалізуємо дані для графіка
+    const monthGraphData: GraphData[] = Array.from(
+      { length: daysInMonth },
+      (_, i) => ({
+        name: `${i + 1}`,
+        current: 0,
+        prev: 0,
+      })
+    );
+
+    // Обробка замовлень поточного місяця
     for (const order of paidOrders) {
-      const week = `Тиждень ${Math.ceil(order.createdAt.getDate() / 7)}`;
-      const index = monthGraphData.findIndex((data) => data.name === week);
+      const day = order.createdAt.getDate(); // Отримуємо день місяця
+      const index = monthGraphData.findIndex((data) => data.name === `${day}`);
       if (index !== -1) {
         monthGraphData[index].current += order.totalPrice.toNumber();
       }
     }
 
+    // Обробка замовлень попереднього місяця
     for (const order of previousPaidOrders) {
-      const week = `Тиждень ${Math.ceil(order.createdAt.getDate() / 7)}`;
-      const index = monthGraphData.findIndex((data) => data.name === week);
+      const day = order.createdAt.getDate(); // Отримуємо день місяця
+      const index = monthGraphData.findIndex((data) => data.name === `${day}`);
       if (index !== -1) {
         monthGraphData[index].prev += order.totalPrice.toNumber();
       }

@@ -45,7 +45,7 @@ const saveContactPerson = async (data: any) => {
     throw new Error(`Failed to fetch data: ${respons.status}`);
   }
 
-  return respons.data.data[0];
+  return respons.data.data[0]; //data[0];
 };
 
 export async function POST(
@@ -104,6 +104,7 @@ export async function POST(
       );
     }
 
+    // console.log(totalPrice);
     const cost = String(totalPrice)
       .replace(/[^\d,]/g, "")
       .replace(",", ".");

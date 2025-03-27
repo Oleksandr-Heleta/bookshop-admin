@@ -59,6 +59,7 @@ export const Overview: React.FC<OverviewProps> = ({ data }) => {
           type="monotone"
           dataKey="current"
           stroke="#8884d8"
+          strokeWidth={3}
           activeDot={{ r: 8 }}
         />
         <Line type="monotone" dataKey="prev" stroke="#82ca9d" />

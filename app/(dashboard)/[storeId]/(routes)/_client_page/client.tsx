@@ -110,7 +110,7 @@ export const DashboardClient = ({}) => {
             title="Статистика"
             description="Переглянь стан свого магазину"
           />
-          <Select onValueChange={onChangePeriod} defaultValue="all">
+          <Select onValueChange={onChangePeriod} defaultValue={period}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Виберіть період" />
             </SelectTrigger>
