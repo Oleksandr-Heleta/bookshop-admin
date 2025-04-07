@@ -191,13 +191,7 @@ export async function POST(
           : {}),
         ...(orderState === "afterrecive"
           ? {
-              BackwardDeliveryData: [
-                {
-                  PayerType: "Recipient",
-                  CargoType: "Money",
-                  RedeliveryString: cost,
-                },
-              ],
+              AfterpaymentOnGoodsCost: cost,
             }
           : {}),
       },

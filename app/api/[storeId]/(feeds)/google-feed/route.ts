@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
-import prismadb from '@/lib/prismadb';
-import { format } from 'date-fns';
+import { NextResponse } from "next/server";
+import prismadb from "@/lib/prismadb";
+import { format } from "date-fns";
 
-const googleShoppingNamespace = 'http://base.google.com/ns/1.0';
+const googleShoppingNamespace = "http://base.google.com/ns/1.0";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': `*`,
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  "Access-Control-Allow-Origin": `*`,
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
 };
 
 export async function OPTIONS() {
@@ -19,7 +19,7 @@ export async function GET(
   { params }: { params: { storeId: string } }
 ) {
   if (!params.storeId) {
-    return new NextResponse('Store ID is required', { status: 400 });
+    return new NextResponse("Store ID is required", { status: 400 });
   }
 
   try {
@@ -35,7 +35,7 @@ export async function GET(
         publishing: true,
         images: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },
@@ -57,7 +57,7 @@ export async function GET(
 <?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:g="${googleShoppingNamespace}" version="2.0">
   <channel>
-    <title>Магазин дитячих книг МИШКА</title>
+    <title>mouse-kidsbooks.com.ua</title>
     <link>${process.env.FRONTEND_STORE_URL}</link>
     <description>Купуйте книги для дітей онлайн</description>
     ${products
@@ -65,15 +65,15 @@ export async function GET(
         (product) => `
       <item>
         <g:id>${product.id}</g:id>
-        <g:title><![CDATA[${product.name}. Дитяча книга]]></g:title>
+        <g:title><![CDATA[Дитяча книга ${product.name}]]></g:title>
         <g:description><![CDATA[${product.description}]]></g:description>
         <g:link>${process.env.FRONTEND_STORE_URL}/product/${product.id}</g:link>
-        <g:image_link>${product.images[0]?.url ?? ''}</g:image_link>
+        <g:image_link>${product.images[0]?.url ?? ""}</g:image_link>
         <g:price>${product.price} UAH</g:price>
         <g:availability>${
-          product.quantity > 0 ? 'in stock' : 'out of stock'
+          product.quantity > 0 ? "in stock" : "out of stock"
         }</g:availability>
-          ${product.isbn ? `<g:gtin>${product.isbn}</g:gtin>` : ''}
+          ${product.isbn ? `<g:gtin>${product.isbn}</g:gtin>` : ""}
         <g:brand><![CDATA[${product.publishing.name}]]></g:brand>
         <g:google_product_category>![CDATA[Media > Books > Children's Books]]</g:google_product_category>
         <g:product_type><![CDATA[Books & Magazines > Books > Children's Books]]></g:product_type>
@@ -91,22 +91,22 @@ export async function GET(
             (age) =>
               ageGroups.find((ageGroup) => ageGroup.id === age.ageGroupId)?.name
           )
-          .join(', ')} роки]]</g:custom_label_0>
+          .join(", ")} роки]]</g:custom_label_0>
         <g:custom_label_1>![CDATA[Категорія: ${product.categories
           .map(
             (category) =>
               categories.find((cat) => cat.id === category.categoryId)?.name
           )
-          .join(', ')}]]</g:custom_label_1>
+          .join(", ")}]]</g:custom_label_1>
           ${
             product.author
               ? `<g:custom_label_2>![CDATA[Автор: ${product.author}]]</g:custom_label_2>`
-              : ''
+              : ""
           }
       </item>
     `
       )
-      .join('')}
+      .join("")}
   </channel>
 </rss>
   `;
@@ -115,10 +115,10 @@ export async function GET(
       status: 200,
       headers: corsHeaders,
     });
-    response.headers.set('Content-Type', 'application/xml');
+    response.headers.set("Content-Type", "application/xml");
     return response;
   } catch (error) {
-    console.error('Error fetching data:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Error fetching data:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
