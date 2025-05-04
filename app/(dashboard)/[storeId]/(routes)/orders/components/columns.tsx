@@ -36,6 +36,13 @@ export const columns: ColumnDef<OrderColumn>[] = [
     },
   },
   {
+    accessorKey: "id",
+    header: "Номер",
+    cell: ({ row }) => {
+      return row.original.id;
+    },
+  },
+  {
     accessorKey: "products",
     header: "Товари",
     cell: ({ row }) => {

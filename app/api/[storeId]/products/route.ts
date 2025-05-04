@@ -265,13 +265,14 @@ export async function GET(
       },
     });
 
+    // console.log(name);
     const filteredProducts = name
       ? products.filter((product) =>
           product.name.toLowerCase().includes(name.toLowerCase())
         )
       : products;
 
-    // console.log(filteredProducts);
+    // console.log(filteredProducts.length);
     return NextResponse.json(
       { data: filteredProducts },
       { headers: corsHeaders }

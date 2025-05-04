@@ -102,7 +102,7 @@ export async function ChangeId(
 
 export const statuses = [
   { name: "Не оброблено", value: "new", color: "red-500" },
-  { name: "Зпаковано", value: "ready", color: "red-500" },
+  { name: "Запаковано", value: "ready", color: "green-500" },
   { name: "Відправлено", value: "sended", color: "black" },
   { name: "Повернуто", value: "returned", color: "black" },
   { name: "Завершено", value: "completed", color: "black" },
